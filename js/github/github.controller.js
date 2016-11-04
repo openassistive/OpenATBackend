@@ -8,6 +8,7 @@ exports.scrape_Github = function(req, res) {
 
     //var url = 'http://www.github.com/' + req.params.id + '/' + req.params.url;
     var url = 'http://www.github.com';
+    var reponame = "github";
     if (req.params.url0 != undefined && req.params.url0 != '') {
         url += '/' + req.params.url0;
     }
@@ -27,12 +28,10 @@ exports.scrape_Github = function(req, res) {
         url += '/' + req.params.url5;
     }
 
-    var tags = req.params.tags;
-    console.log(tags);
-    exports.scrape(url, tags, res);
+    exports.scrape(url, res);
 };
 
-exports.scrape = function(url, tags, res) {
+exports.scrape = function(url, res) {
 
     console.log(url);
 
@@ -53,7 +52,6 @@ exports.scrape = function(url, tags, res) {
                 image_download = "",
                 enable_download = 1;
             var json = {
-                tags: "",
                 title: "",
                 type: "",
                 authors: "",
@@ -66,7 +64,8 @@ exports.scrape = function(url, tags, res) {
                 thumb: "",
                 original_url: ""
             };
-            json.tags = tags;
+
+            //json.tags = tags;
             json.type = "software";
             project_url = $('span.repository-meta-content a').first().attr('href');
             if (project_url == undefined || project_url == "") {
@@ -74,11 +73,16 @@ exports.scrape = function(url, tags, res) {
             }
             json.project_url = project_url;
             json.original_url = url;
-            json.title = $('h1').first().text().trim();
-            if (json.title == undefined || json.title == '') {
-                json.title = 'github - Page not found';
+            title = $('h1').first().text().trim();
+            if (title == undefined || title == '' || title == '404') {
+                title = 'github - Page not found';
                 enable_download = 0;
+                res.send("Sorry, Page not found");
+                return;
             }
+            var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Github)/ig;
+            title = title.replace(rexp, ' ');
+            json.title = title.trim();
             json.authors = $('span.author').text().trim();
 
             License = $('h1:contains("License")').first().next('p').text();
@@ -121,14 +125,14 @@ exports.scrape = function(url, tags, res) {
             // console.log(data_img[0]['attribs']['src']);
             if (image != undefined && image != "") {
                 var re = /[\w* ]+/i;
-                var title_img = re.exec(json.title)[0];
+                var title_img = re.exec(title)[0];
                 json.image = "images/full/" + title_img;
                 json.thumb = "images/thumb/" + title_img;
 
                 if (title_img == undefined || title_img == '') {
                     title_img = 'github';
                 }
-                title_img = title_img.toLowerCase();
+                title_img = title_img.toLowerCase().trim();
                 var patt1 = /\s/g;
                 title_img = title_img.replace(patt1, '_');
                 json.image = "images/full/" + title_img;
@@ -144,7 +148,7 @@ exports.scrape = function(url, tags, res) {
 
         }
 
-        fs.writeFile('./md/github.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
         fs.writeFile('./json/output_github.json', JSON.stringify(json, null, 4), function(err) {

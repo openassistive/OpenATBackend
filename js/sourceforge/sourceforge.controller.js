@@ -68,11 +68,16 @@ exports.scrape = function(url, res) {
                 title = data.text().trim();
             })
 
-            if (title == undefined || title == '') {
+            if (title == undefined || title == '' || title == "404") {
                 title = 'sourceforge Page not found';
                 enable_download = 0;
+                res.send("Sorry, Page not found");
+                return;
             }
-            json.title = title;
+            var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Sourceforge)/ig;
+            title = title.replace(rexp, '');
+            json.title = title.trim();
+
             json.License = $('section#project-categories-and-license section.content a').text().trim();
             json.datemod = $('time.dateUpdated').text().trim();
             authors = "";
@@ -127,11 +132,11 @@ exports.scrape = function(url, res) {
             */
             if (image != undefined && image != "") {
                 var re = /[\w* ]+/i;
-                var title_img = re.exec(json.title)[0];
+                var title_img = re.exec(title)[0];
                 if (title_img == undefined || title_img == '') {
                     title_img = 'sourceforge';
                 }
-                title_img = title_img.toLowerCase();
+                title_img = title_img.toLowerCase().trim();
                 var patt1 = /\s/g;
                 title_img = title_img.replace(patt1, '_');
 
@@ -153,7 +158,7 @@ exports.scrape = function(url, res) {
             })
         }
 
-        fs.writeFile('./md/sourceforge.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
 
             if (err) {
                 console.log(err);

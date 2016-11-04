@@ -64,11 +64,15 @@ exports.scrape = function(url, res) {
             json.project_url = url;
             json.original_url = url;
             title = $('div.title-bar h1.title').text().trim();
-            if (title == undefined || title == '') {
+            if (title == undefined || title == '' || title == '404') {
                 title = 'instructables - Page not found';
                 enable_download = 0;
+                res.send("Sorry, Page not found");
+                return;
             }
-            json.title = title;
+            var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Instructables)/ig;
+            title = title.replace(rexp, ' ');
+            json.title = title.trim();
             json.License = $('section#project-categories-and-license section.content a').text().trim();
             json.datemod = $('meta[itemprop=datePublished]').attr('content');
             authors = "";
@@ -107,11 +111,11 @@ exports.scrape = function(url, res) {
 
             if (image != undefined && image != "") {
                 var re = /[\w* ]+/i;
-                var title_img = re.exec(json.title)[0];
+                var title_img = re.exec(title)[0];
                 if (title_img == undefined || title_img == '') {
                     title_img = 'instructables';
                 }
-                title_img = title_img.toLowerCase();
+                title_img = title_img.toLowerCase().trim();
                 var patt1 = /\s/g;
                 title_img = title_img.replace(patt1, '_');
 
@@ -133,7 +137,7 @@ exports.scrape = function(url, res) {
             })
         }
 
-        fs.writeFile('./md/instructables.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
         fs.writeFile('./json/output_Instructables.json', JSON.stringify(json, null, 4), function(err) {

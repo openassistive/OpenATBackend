@@ -65,11 +65,15 @@ exports.scrape = function(url, res) {
                 title = data.text().trim();
 
             })
-            if (title == undefined || title == '') {
+            if (title == undefined || title == '' || title == '404') {
                 title = 'pinshape - Page not found';
                 enable_download = 0;
+                res.send("Sorry, Page not found");
+                return;
             }
-            json.title = title;
+            var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Pinshape)/ig;
+            title = title.replace(rexp, ' ');
+            json.title = title.trim();
             $('div.designed-by a').filter(function() {
                 var data = $(this);
                 authors = data.text().trim();
@@ -119,11 +123,11 @@ exports.scrape = function(url, res) {
             image_download = 'http:' + image;
             if (image != undefined && image != "") {
                 var re = /[\w* ]+/i;
-                var title_img = re.exec(json.title)[0];
+                var title_img = re.exec(title)[0];
                 if (title_img == undefined || title_img == '') {
                     title_img = 'pinshape';
                 }
-                title_img = title_img.toLowerCase();
+                title_img = title_img.toLowerCase().trim();
                 var patt1 = /\s/g;
                 title_img = title_img.replace(patt1, '_');
                 json.image = "images/full/" + title_img;
@@ -142,7 +146,7 @@ exports.scrape = function(url, res) {
                 json.main_description = main_description;
             })
         }
-        fs.writeFile('./md/pinshape.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
         fs.writeFile('./json/output_Pinshape.json', JSON.stringify(json, null, 4), function(err) {

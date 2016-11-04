@@ -9,27 +9,34 @@ var image_download = "";
 
 exports.scrape_Thingiverse = function(req, res) {
     var url = 'http://www.thingiverse.com'; // + req.params.id; // + '/' + req.params.url;
+    var reponame = "thingiverse";
     if (req.params.url0 != undefined && req.params.url0 != '') {
         url += '/' + req.params.url0;
+        reponame = req.params.url0;
     }
     if (req.params.url1 != undefined && req.params.url1 != '') {
         url += '/' + req.params.url1;
+        reponame = req.params.url1;
     }
     if (req.params.url2 != undefined && req.params.url2 != '') {
         url += '/' + req.params.url2;
+        reponame = req.params.url2;
     }
     if (req.params.url3 != undefined && req.params.url3 != '') {
         url += '/' + req.params.url3;
+        reponame = req.params.url3;
     }
     if (req.params.url4 != undefined && req.params.url4 != '') {
         url += '/' + req.params.url4;
+        reponame = req.params.url4;
     }
     if (req.params.url5 != undefined && req.params.url5 != '') {
         url += '/' + req.params.url5;
+        reponame = req.params.url5;
     }
-    exports.scrape(url, res);
+    exports.scrape(url, reponame, res);
 };
-exports.scrape = function(url, res) {
+exports.scrape = function(url, reponame, res) {
 
     console.log(url);
     var title = "",
@@ -62,19 +69,22 @@ exports.scrape = function(url, res) {
                 main_description: "",
                 image: "",
                 thumb: "",
-                original_url: "",
-                image_download: ""
+                original_url: ""
             };
 
             json.type = "hardware";
             json.project_url = url;
             json.original_url = url;
-            json.title = $('title').text().trim();
-            if (json.title == undefined || json.title == '') {
-                json.title = 'thingiverse - Page not found';
+            title = $('title').text().trim();
+            if (title == undefined || title == '' || title == '404') {
+                title = 'thingiverse - Page not found';
                 enable_download = 0;
+                res.send("Sorry, Page not found");
+                return;
             }
-
+            var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Thingiverse)/ig;
+            title = title.replace(rexp, ' ');
+            json.title = title.trim();
             json.License = $('div.thing-license').first().attr('title');
             json.datemod = $('div.thing-header-data time').attr('datetime');
             authors = "";
@@ -113,11 +123,11 @@ exports.scrape = function(url, res) {
             image_download = image;
             if (image != undefined && image != "") {
                 var re = /[\w* ]+/i;
-                var title_img = re.exec(json.title)[0];
+                var title_img = re.exec(title)[0];
                 if (title_img == undefined || title_img == '') {
                     title_img = 'thingiverse';
                 }
-                title_img = title_img.toLowerCase();
+                title_img = title_img.toLowerCase().trim();
                 var patt1 = /\s/g;
                 title_img = title_img.replace(patt1, '_');
 
@@ -137,15 +147,16 @@ exports.scrape = function(url, res) {
 
                 json.main_description = main_description;
             })
+
         }
 
-        fs.writeFile('./md/thingiverse.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
         fs.writeFile('./json/output_thingiverse.json', JSON.stringify(json, null, 4), function(err) {
             console.log('File successfully written! - Check your project directory for the output.json file');
         })
-
+        res.send(url);
     });
 
 
