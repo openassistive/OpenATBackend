@@ -68,7 +68,7 @@ exports.scrape = function(url, res) {
             if (title == undefined || title == '' || title == '404') {
                 title = 'instructables - Page not found';
                 enable_download = 0;
-                res.send("Sorry, Page not found");
+                res.json({ error: "page not found"});
                 return;
             }
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Instructables)/ig;

@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 app.set('port', (process.env.PORT || 5000));
 
-// Init stuff
+// Init stuff - this will eventually get removed once we move to the whole github pulling and updating 
 var mkdirp = require('mkdirp');
 
 mkdirp('download_image', function (err) {
