@@ -12,7 +12,7 @@ mkdirp('download_image', function (err) {
 
 mkdirp('output', function (err) {
     if (err) console.error(err)
-    else console.log('Could not make md dir')
+    else console.log('Could not make output dir')
 });
 
 
