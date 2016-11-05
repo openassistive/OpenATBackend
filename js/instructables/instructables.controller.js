@@ -3,6 +3,7 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var contentCreator = require('../functions');
+var toMarkdown = require('to-markdown');
 
 exports.scrape_Instructables = function(req, res) {
     var url = 'http://www.instructables.com'; // + req.params.id + '/' + req.params.url;
@@ -137,10 +138,10 @@ exports.scrape = function(url, res) {
             })
         }
 
-        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./output/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
-        fs.writeFile('./json/output_Instructables.json', JSON.stringify(json, null, 4), function(err) {
+        fs.writeFile('./output/output_Instructables.json', JSON.stringify(json, null, 4), function(err) {
             console.log('File successfully written! - Check your project directory for the output.json file');
         })
 

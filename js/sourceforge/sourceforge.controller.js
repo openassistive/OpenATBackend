@@ -3,6 +3,7 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var contentCreator = require('../functions');
+var toMarkdown = require('to-markdown');
 
 exports.scrape_Sourceforge = function(req, res) {
     var url = 'http://www.sourceforge.net'; // + req.params.id + '/' + req.params.url;
@@ -152,13 +153,12 @@ exports.scrape = function(url, res) {
             }
             $("p#description").filter(function() {
                 var data = $(this);
-                main_description = data.text();
-
+                main_description = toMarkdown(data.html());
                 json.main_description = main_description;
             })
         }
 
-        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./output/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
 
             if (err) {
                 console.log(err);
@@ -166,7 +166,7 @@ exports.scrape = function(url, res) {
                 console.log('MDFile created successfully!');
             }
         });
-        fs.writeFile('./json/output_Sourceforge.json', JSON.stringify(json, null, 4), function(err) {
+        fs.writeFile('./output/output_Sourceforge.json', JSON.stringify(json, null, 4), function(err) {
 
             if (err) {
                 console.log(err);

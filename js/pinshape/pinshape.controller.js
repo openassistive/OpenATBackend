@@ -3,6 +3,7 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var contentCreator = require('../functions');
+var toMarkdown = require('to-markdown');
 
 exports.scrape_Pinshape = function(req, res) {
     var url = 'http://www.pinshape.com'; // + req.params.id + '/' + req.params.url;
@@ -141,15 +142,14 @@ exports.scrape = function(url, res) {
             }
             $("p.description").filter(function() {
                 var data = $(this);
-                main_description = data.siblings('meta').attr("content");
-
+                main_description = toMarkdown(data.siblings('meta').attr("content"));
                 json.main_description = main_description;
             })
         }
-        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./output/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
-        fs.writeFile('./json/output_Pinshape.json', JSON.stringify(json, null, 4), function(err) {
+        fs.writeFile('./output/output_Pinshape.json', JSON.stringify(json, null, 4), function(err) {
             console.log('File successfully written! - Check your project directory for the output.json file');
         })
 

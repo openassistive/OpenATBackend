@@ -4,6 +4,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var http = require('http');
 var contentCreator = require('../functions');
+var toMarkdown = require('to-markdown');
 
 var image_download = "";
 
@@ -143,17 +144,17 @@ exports.scrape = function(url, reponame, res) {
             }
             $("div.description").filter(function() {
                 var data = $(this);
-                main_description = data.text();
+                main_description = toMarkdown(data.html());
 
                 json.main_description = main_description;
             })
 
         }
 
-        fs.writeFile('./md/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
+        fs.writeFile('./output/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
-        fs.writeFile('./json/output_thingiverse.json', JSON.stringify(json, null, 4), function(err) {
+        fs.writeFile('./output/output_thingiverse.json', JSON.stringify(json, null, 4), function(err) {
             console.log('File successfully written! - Check your project directory for the output.json file');
         })
         res.send(url);

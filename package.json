@@ -13,6 +13,7 @@
     "express": "latest",
     "image-downloader": "^2.0.0",
     "mkdirp": "^0.5.1",
-    "request": "latest"
+    "request": "latest",
+    "to-markdown": "^3.0.3"
   }
 }

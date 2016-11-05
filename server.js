@@ -10,14 +10,9 @@ mkdirp('download_image', function (err) {
     else console.log('Could not make download_image dir')
 });
 
-mkdirp('md', function (err) {
+mkdirp('output', function (err) {
     if (err) console.error(err)
     else console.log('Could not make md dir')
-});
-
-mkdirp('json', function (err) {
-    if (err) console.error(err)
-    else console.log('Could not make json dir')
 });
 
 
