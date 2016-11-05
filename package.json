@@ -1,12 +1,12 @@
 {
-  "name": "node-web-scrape",
+  "name": "OpenATBackend",
   "version": "0.0.1",
-  "description": "Scrape le web.",
+  "description": "Create MD files from provided sites",
   "main": "server.js",
-  "author": "Scotch",
+  "author": "willwade",
   "repository": {
     "type": "git",
-    "url": "https://github.com/scotch-io/node-web-scraper"
+    "url": "http://github.com/openassistive/OpenATBackEnd"
   },
   "dependencies": {
     "cheerio": "latest",
