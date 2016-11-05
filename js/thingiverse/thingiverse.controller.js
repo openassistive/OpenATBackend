@@ -154,10 +154,9 @@ exports.scrape = function(url, reponame, res) {
         fs.writeFile('./output/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
             console.log('MDFile created successfully!');
         });
-        fs.writeFile('./output/output_thingiverse.json', JSON.stringify(json, null, 4), function(err) {
-            console.log('File successfully written! - Check your project directory for the output.json file');
-        })
-        res.send(url);
+
+        res.json(json);
+
     });
 
 
