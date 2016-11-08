@@ -4,6 +4,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var contentCreator = require('../functions');
 var toMarkdown = require('to-markdown');
+var moment = require('moment');
 
 exports.scrape_Sourceforge = function(req, res) {
     var url = 'http://www.sourceforge.net'; // + req.params.id + '/' + req.params.url;
@@ -80,7 +81,7 @@ exports.scrape = function(url, res) {
             json.title = title.trim();
 
             json.License = $('section#project-categories-and-license section.content a').text().trim();
-            json.datemod = $('time.dateUpdated').text().trim();
+            json.datemod = moment($('time.dateUpdated').text().trim()).format("YYYY-MM-DD HH:mm");
             authors = "";
             $("p[itemprop='author'] span[itemprop='name']").each(function(index, item) {
 
@@ -111,13 +112,11 @@ exports.scrape = function(url, res) {
             var img_url = $("div.strip img").first();
             if (img_url != undefined && img_url != "") {
                 image = img_url.attr("src");
-                console.log(img_url.attr('alt'));
                 json.image = image;
                 image_download = "http:" + image;
             } else {
                 img_url = $('img').first();
                 image = img_url.attr("src");
-                console.log(img_url.attr('alt'));
                 json.image = image;
                 image_download = "http:" + image;
             }

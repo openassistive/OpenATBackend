@@ -4,6 +4,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var contentCreator = require('../functions');
 var toMarkdown = require('to-markdown');
+var moment = require('moment');
 
 exports.scrape_Pinshape = function(req, res) {
     var url = 'http://www.pinshape.com'; // + req.params.id + '/' + req.params.url;
@@ -38,6 +39,7 @@ exports.scrape = function(url, res) {
                 authors = "",
                 License = "",
                 download_url = "",
+                datemod = "",
                 project_url = "",
                 description = "",
                 image = "",
@@ -49,6 +51,7 @@ exports.scrape = function(url, res) {
                 title: "",
                 type: "",
                 authors: "",
+                datemod: "",
                 License: "",
                 download_url: "",
                 project_url: "",

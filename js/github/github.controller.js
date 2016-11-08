@@ -4,6 +4,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var contentCreator = require('../functions');
 var toMarkdown = require('to-markdown');
+var moment = require('moment');
 
 exports.scrape_Github = function(req, res) {
 
@@ -97,7 +98,7 @@ exports.scrape = function(url, res) {
 
             json.License = License;
             console.log($('a[name=user-content-license]').next().next().text());
-            json.datemod = $('span[itemprop=dateModified]').text().trim();
+            json.datemod = moment($('span[itemprop=dateModified]').text().trim()).format("YYYY-MM-DD HH:mm");
 
             if ($('span.num.text-emphasized').first().text().trim() != '0') {
                 download_url = url + '/releases';

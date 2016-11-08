@@ -4,6 +4,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var contentCreator = require('../functions');
 var toMarkdown = require('to-markdown');
+var moment = require('moment');
 
 exports.scrape_Instructables = function(req, res) {
     var url = 'http://www.instructables.com'; // + req.params.id + '/' + req.params.url;
@@ -75,7 +76,7 @@ exports.scrape = function(url, res) {
             title = title.replace(rexp, ' ');
             json.title = title.trim();
             json.License = $('section#project-categories-and-license section.content a').text().trim();
-            json.datemod = $('meta[itemprop=datePublished]').attr('content');
+            json.datemod = moment($('meta[itemprop=datePublished]').attr('content')).format("YYYY-MM-DD HH:mm");
             authors = "";
             $('span.author a[rel="author"]').each(function(index, item) {
 

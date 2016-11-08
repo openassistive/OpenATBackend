@@ -5,6 +5,7 @@ var cheerio = require('cheerio');
 var http = require('http');
 var contentCreator = require('../functions');
 var toMarkdown = require('to-markdown');
+var moment = require('moment');
 
 var image_download = "";
 
@@ -87,7 +88,7 @@ exports.scrape = function(url, reponame, res) {
             title = title.replace(rexp, ' ');
             json.title = title.trim();
             json.License = $('div.thing-license').first().attr('title');
-            json.datemod = $('div.thing-header-data time').attr('datetime');
+            json.datemod = moment($('div.thing-header-data time').attr('datetime')).format("YYYY-MM-DD HH:mm");
             authors = "";
             $('div.thing-header-data a').each(function(index, item) {
 
