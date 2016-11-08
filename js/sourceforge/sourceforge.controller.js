@@ -144,11 +144,7 @@ exports.scrape = function(url, res) {
                 json.image = "images/full/" + title_img;
                 json.thumb = "images/thumb/" + title_img;
                 if (enable_download > 0) {
-                    contentCreator.SaveImages(image_download, './download_image/' + title_img, function() {
-                        console.log(image_download);
-                        console.log('done');
-                    });
-
+                    contentCreator.SaveImages(image_download, './download_image/' + title_img);
                 }
             }
             $("p#description").filter(function() {

@@ -140,9 +140,7 @@ exports.scrape = function(url, res) {
                 json.thumb = "images/thumb/" + title_img;
                 image_download = image;
                 if (enable_download > 0) {
-                    contentCreator.download(image_download, './download_image/' + title_img, function() {
-                        console.log('done');
-                    });
+                    contentCreator.SaveImages(image_download, './download_image/' + title_img);
                 }
 
             }

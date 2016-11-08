@@ -14,6 +14,8 @@
     "image-downloader": "^2.0.0",
     "mkdirp": "^0.5.1",
     "request": "latest",
+    "sharp": "^0.16.2",
+    "tmp": "0.0.30",
     "to-markdown": "^3.0.3"
   }
 }
