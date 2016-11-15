@@ -9,8 +9,10 @@
     "url": "http://github.com/openassistive/OpenATBackEnd"
   },
   "dependencies": {
+    "body-parser": "^1.15.2",
     "cheerio": "latest",
     "express": "latest",
+    "hubfs.js": "^1.0.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.15.2",
     "request": "latest",

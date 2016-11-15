@@ -123,9 +123,7 @@ exports.scrape = function(url, res) {
 
                 json.image = "images/full/" + title_img;
                 json.thumb = "images/thumb/" + title_img;
-                if (enable_download > 0) {
-                    contentCreator.SaveImages(image_download, './download_image/' + title_img);
-                }
+                json.image_download = image_download;
 
             }
 
@@ -137,9 +135,6 @@ exports.scrape = function(url, res) {
             })
         }
 
-        fs.writeFile('./output/' + title_img + '.md', contentCreator.createMDFile(json), function(err) {
-            console.log('MDFile created successfully!');
-        });
 
         res.json(json);
     })

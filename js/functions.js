@@ -3,8 +3,66 @@
 var fs = require('fs');
 var request = require('request');
 var http = require("http");
-
 var sharp = require('sharp');
+var Hubfs = require('hubfs.js')
+
+var GHOptions = {
+  owner: 'openassistive',
+  repo: 'openat-hugrid',
+  auth: {
+   token: 'e9df2893d3ab0b6682c438e6d79b28e26d317f6f'
+  }
+}
+/* 
+   writes file to github
+*/
+exports.writeFileToGithub = function(fileToSend,locationInGit) {
+   var gh = Hubfs(options)
+   // token auth 
+   fs.readFile(fileToSend, function (err,data) {
+     if (err) {
+       return console.log(err);
+     }
+     gh.writeFile(locationInGit, data, function (err) {
+     if (err) throw err
+     console.log('It\'s saved!')
+     })
+   });
+}
+
+/* 
+   writes data to github
+*/
+exports.writeDataToGithub = function(dataToSend,locationInGit) {
+   var gh = Hubfs(options)
+   // token auth 
+   gh.writeFile(locationInGit, data, function (err) {
+   if (err) throw err
+   console.log('It\'s saved!')
+   });
+}
+
+
+exports.generateMDFile = function(json) {
+    var content = '---\n';
+    //var obj = JSON.parse(json);
+    var obj = json;
+    var temp = "";
+    for (var index in obj) {
+        if (index != 'main_description') {
+            temp += (index + ':' + obj[index] + '\n');
+        }
+
+    }
+    content += temp + '\n' + '---\n';
+
+    if (json.main_description != undefined && json.main_description != "") {
+        content += json.main_description;
+    }
+
+    return content;
+};
+
 
 exports.createMDFile = function(json) {
     var content = '---\n';

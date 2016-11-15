@@ -12,8 +12,7 @@ module.exports = function(app) {
     app.use('/add/:tags/instructables', require('./js/instructables'));
     app.use('/add/:tags/thingiverse', require('./js/thingiverse'));
     app.use('/add/:tags/sourceforge', require('./js/sourceforge'));
-    // app.use('/git', require('./js/git'));
-    // All other routes should redirect to the index.html
+    app.use('/save', require('./js/savejson'));
     app.route('/*')
         .get(function(req, res) {
             res.json({ error: "Sorry, this site is not supported" });

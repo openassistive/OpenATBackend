@@ -1,5 +1,7 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+var jsonParser = bodyParser.json();
 app.set('port', (process.env.PORT || 5000));
 
 // Init stuff - this will eventually get removed once we move to the whole github pulling and updating 
