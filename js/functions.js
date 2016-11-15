@@ -10,7 +10,7 @@ var GHOptions = {
   owner: 'openassistive',
   repo: 'openat-hugrid',
   auth: {
-   token: 'e9df2893d3ab0b6682c438e6d79b28e26d317f6f'
+   token: process.env.GitHubOAuth
   }
 }
 /* 
