@@ -16,6 +16,7 @@ exports.saveJSON = function(req, res) {
    var json = req.body;
 
    // we need to write to GitHub - not just download
+   // need to fix tags - maybe in the generateMDFile function
    contentCreator.SaveImages(json.image_download, './download_image/' + json.title_img);
    contentCreator.writeDataToGithub(json.short_title + '.md', contentCreator.generateMDFile(json), function (err) {
      if (err) throw err
