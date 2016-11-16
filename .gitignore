@@ -13,7 +13,11 @@ results
 
 npm-debug.log
 node_modules
+
+
 md
 json
 download_image
 setup.sh
+build
+scripts
