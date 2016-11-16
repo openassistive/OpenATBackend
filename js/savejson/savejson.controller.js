@@ -4,7 +4,9 @@ var contentCreator = require('../functions');
 
 exports.saveJSON = function(req, res) {
    
-   if (!req.body) return res.sendStatus(400);
+   if (!req.body){
+    return res.sendStatus(400);
+   } 
    /* WARNING!!!
       
       there is no error checking!!!! 
@@ -14,14 +16,29 @@ exports.saveJSON = function(req, res) {
    */
    
    var json = req.body;
-
+   
+   if (!json.title) {
+    res.json({ error: "Sorry, the item needs a title" });
+   }
+   
+   if (!json.short_title) {
+    res.json({ error: "Sorry, the item needs a short_title" });
+   }   
+   
+   if (!json.original_url) {
+    res.json({ error: "Sorry, the item needs a original_url" });   
+   }
+   
    // we need to write to GitHub - not just download
    // need to fix tags - maybe in the generateMDFile function
-   contentCreator.SaveImages(json.image_download, './download_image/' + json.title_img);
-   contentCreator.writeDataToGithub(json.short_title + '.md', contentCreator.generateMDFile(json), function (err) {
+   if (json.image_download){
+      contentCreator.SaveImagesToGitHub(json.image_download, './download_image/' + json.title_img, 'item-images/');
+   }
+   
+   contentCreator.writeDataToGithub(contentCreator.generateMDFile(json), 'content/item/'+json.short_title + '.md', function (err) {
      if (err) throw err
      console.log('It\'s saved!')
    });
-   res.json('Complete');
 
+   res.json({success: json.short_title});
 };

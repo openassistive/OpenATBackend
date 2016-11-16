@@ -113,3 +113,28 @@ exports.SaveImages = function(image_url,filename) {
               });      
    });
 };
+
+exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
+   var sharp = require('sharp');
+   var tmp = require('tmp');
+   tmp.file({ mode: parseInt('0644',8), prefix: 'openatimg-', postfix: '.jpg' },function _tempFileCreated(err, path, fd) {
+     if (err) throw err;
+     exports.download(image_url,path, function() {
+               var imaget = sharp(path)
+                 .resize(250, 250)
+                 .png()
+                 .toFile(filename+'-thumb.png', function(err) {
+                 });
+   
+                var imagel = sharp(path)
+                 .resize(500, 500)
+                 .png()
+                 .toFile(filename+'.png', function(err) {
+                 });  
+                 
+              });      
+   });
+   //Now write to Github - NB - NOT ASYNC. QUICK FIX
+   exports.writeFileToGithub(filename+'-thumb.png',locationInGit+filename+'-thumb.png');
+   exports.writeFileToGithub(filename+'.png',locationInGit+filename+'.png');   
+};
