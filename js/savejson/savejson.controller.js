@@ -5,6 +5,7 @@ var contentCreator = require('../functions');
 exports.saveJSON = function(req, res) {
    
    if (!req.body){
+    console.log('no body');
     return res.sendStatus(400);
    } 
    /* WARNING!!!
@@ -16,16 +17,20 @@ exports.saveJSON = function(req, res) {
    */
    
    var json = req.body;
+   console.log('now saving...');
    
    if (!json.title) {
+    console.log('no title');
     return res.json({ error: "Sorry, the item needs a title" });
    }
    
    if (!json.short_title) {
+    console.log('no short title');
     return res.json({ error: "Sorry, the item needs a short_title" });
    }   
    
    if (!json.original_url) {
+    console.log('no orig url');
     return res.json({ error: "Sorry, the item needs a original_url" });   
    }
    
