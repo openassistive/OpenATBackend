@@ -18,15 +18,15 @@ exports.saveJSON = function(req, res) {
    var json = req.body;
    
    if (!json.title) {
-    res.json({ error: "Sorry, the item needs a title" });
+    return res.json({ error: "Sorry, the item needs a title" });
    }
    
    if (!json.short_title) {
-    res.json({ error: "Sorry, the item needs a short_title" });
+    return res.json({ error: "Sorry, the item needs a short_title" });
    }   
    
    if (!json.original_url) {
-    res.json({ error: "Sorry, the item needs a original_url" });   
+    return res.json({ error: "Sorry, the item needs a original_url" });   
    }
    
    // we need to write to GitHub - not just download
@@ -40,5 +40,5 @@ exports.saveJSON = function(req, res) {
      console.log('It\'s saved!')
    });
 
-   res.json({success: json.short_title});
+   return res.json({success: json.short_title});
 };
