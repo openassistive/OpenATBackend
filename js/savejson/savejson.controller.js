@@ -17,7 +17,6 @@ exports.saveJSON = function(req, res) {
    */
    
    var json = req.body;
-   console.log('now saving...');
    
    if (!json.title) {
     console.log('no title');
@@ -42,8 +41,8 @@ exports.saveJSON = function(req, res) {
    
    contentCreator.writeDataToGithub(contentCreator.generateMDFile(json), 'content/item/'+json.short_title + '.md', function (err) {
      if (err) throw err
-     console.log('It\'s saved!')
+     //console.log('It\'s saved!')
+     return res.json({success: json.short_title});
    });
 
-   return res.json({success: json.short_title});
 };

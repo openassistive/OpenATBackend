@@ -17,7 +17,7 @@ var GHOptions = {
    writes file to github
 */
 exports.writeFileToGithub = function(fileToSend,locationInGit) {
-   var gh = Hubfs(options)
+   var gh = Hubfs(GHOptions)
    // token auth 
    fs.readFile(fileToSend, function (err,data) {
      if (err) {
@@ -25,7 +25,8 @@ exports.writeFileToGithub = function(fileToSend,locationInGit) {
      }
      gh.writeFile(locationInGit, data, function (err) {
      if (err) throw err
-     console.log('It\'s saved!')
+     //console.log('It\'s saved!')
+     return true;
      })
    });
 }
@@ -34,11 +35,12 @@ exports.writeFileToGithub = function(fileToSend,locationInGit) {
    writes data to github
 */
 exports.writeDataToGithub = function(dataToSend,locationInGit) {
-   var gh = Hubfs(options)
+   var gh = Hubfs(GHOptions)
    // token auth 
-   gh.writeFile(locationInGit, data, function (err) {
+   gh.writeFile(locationInGit, dataToSend, function (err) {
    if (err) throw err
-   console.log('It\'s saved!')
+   //console.log('It\'s saved!')
+   return true;
    });
 }
 
@@ -87,7 +89,6 @@ exports.createMDFile = function(json) {
 
 exports.download = function(uri, filename, callback) {
     request.head(uri, function(err, res, body) {
-        console.log('Let me download');
         var req = request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
     });
 };
