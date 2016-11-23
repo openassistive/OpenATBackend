@@ -46,7 +46,8 @@ exports.scrape = function(url, res) {
                 original_url = "",
                 main_description = "",
                 image_download = "",
-                enable_download = 1;
+                enable_download = 1,
+                short_title = "";
             var json = {
                 title: "",
                 type: "",
@@ -59,12 +60,14 @@ exports.scrape = function(url, res) {
                 main_description: "",
                 image: "",
                 thumb: "",
-                original_url: ""
+                original_url: "",
+                short_title: ""
             };
 
             json.type = "software";
-            json.project_url = "http://www.oatsoft.org/Software/SpecialAccessToWindows";
-            json.original_url = "https://github.com/alandmoore/wcgbrowser";
+            json.project_url = $('a#homepage').attr("href");
+            json.original_url = url;
+            // Get the Title. This is pretty important
             $('div#project-title h1').filter(function() {
                 var data = $(this);
                 title = data.text().trim();
@@ -79,6 +82,13 @@ exports.scrape = function(url, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Sourceforge)/ig;
             title = title.replace(rexp, '');
             json.title = title.trim();
+            
+            // Get the short_title. Equally important
+            // All short_titles should be the title shortened and ready for files
+            short_title = json.title.toLowerCase();
+            // \W is any non-word char (e.g. ! a-ZA-X0-9_
+            var rexp = /([\W]+)/ig;
+            json.short_title = short_title.replace(rexp, '_');
 
             json.License = $('section#project-categories-and-license section.content a').text().trim();
             json.datemod = moment($('time.dateUpdated').text().trim()).format("YYYY-MM-DD HH:mm");
@@ -97,7 +107,7 @@ exports.scrape = function(url, res) {
             $('section#download_button a').filter(function() {
                 var data = $(this);
                 if (data.attr('title').includes('Download') == true) {
-                    download_url = 'http://www.sourceforge.net/' + data.attr("href");
+                    download_url = 'http://www.sourceforge.net' + data.attr("href");
                 }
                 json.download_url = download_url;
             })
@@ -132,16 +142,8 @@ exports.scrape = function(url, res) {
             */
             if (image != undefined && image != "") {
                 var re = /[\w* ]+/i;
-                var title_img = re.exec(title)[0];
-                if (title_img == undefined || title_img == '') {
-                    title_img = 'sourceforge';
-                }
-                title_img = title_img.toLowerCase().trim();
-                var patt1 = /\s/g;
-                title_img = title_img.replace(patt1, '_');
-
-                json.image = "images/full/" + title_img;
-                json.thumb = "images/thumb/" + title_img;
+                json.image = "images/full/" + short_title;
+                json.thumb = "images/thumb/" + short_title;
                 json.image_download = image_download;
             }
             $("p#description").filter(function() {
