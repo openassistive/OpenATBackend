@@ -29,7 +29,7 @@ exports.scrape_Sourceforge = function(req, res) {
     exports.scrape(url, res);
 };
 exports.scrape = function(url, res) {
-    //console.log(url);
+    console.log(url);
 
     request(url, function(error, response, html) {
         if (!error) {

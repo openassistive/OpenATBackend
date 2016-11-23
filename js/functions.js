@@ -8,7 +8,7 @@ var Hubfs = require('hubfs.js')
 
 var GHOptions = {
   owner: 'openassistive',
-  repo: 'openat-hugrid',
+  repo: 'OpenATFrontEnd',
   auth: {
    token: process.env.GitHubOAuth
   }
