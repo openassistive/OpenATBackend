@@ -58,12 +58,51 @@ exports.scrape = function(url, res) {
                 description: "",
                 image: "",
                 thumb: "",
-                original_url: ""
+                original_url: "",
+                short_title: ""
             };
 
             json.type = "hardware";
             json.project_url = url;
             json.original_url = url;
+                        
+            //Sneaky. This may get pulled in the future! The below is left in the comments just incase
+            $('a.repin.space-right').filter(function() {
+                var data = $(this);
+                var pinshape_JSON = JSON.parse(data.attr("data-id"));
+
+               json.title= pinshape_JSON.name;
+               // Get the short_title. Equally important
+               // All short_titles should be the title shortened and ready for files
+               var short_title = json.title.toLowerCase();
+               // \W is any non-word char (e.g. ! a-ZA-X0-9_
+               var rexp = /([\W]+)/ig;
+               json.short_title = short_title.replace(rexp, '_');
+
+               json.download_url = pinshape_JSON.zip_file.url;
+               json.License =  pinshape_JSON.usage_license;
+
+
+               $('div.designed-by a').filter(function() {
+                   var data = $(this);
+                   authors = data.text().trim();
+                   json.authors = authors;
+               })
+
+               json.datemod =  moment(pinshape_JSON.updated_at).format("YYYY-MM-DD HH:mm"); 
+               json.project_url =  url;
+               json.description = toMarkdown(pinshape_JSON.description);
+               json.original_url =  url;
+            })
+            
+            $('a.button-download').filter(function() {
+                var data = $(this);
+                download_url = url + data.attr("href");
+                json.download_url = download_url;
+            })
+
+            /*               
+              
             $('title').filter(function() {
                 var data = $(this);
                 title = data.text().trim();
@@ -78,11 +117,9 @@ exports.scrape = function(url, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Pinshape)/ig;
             title = title.replace(rexp, ' ');
             json.title = title.trim();
-            $('div.designed-by a').filter(function() {
-                var data = $(this);
-                authors = data.text().trim();
-                json.authors = authors;
-            })
+
+
+
             $('a[rel=nofollow]').each(function(index, item) {
 
                 if (item.attribs['href'].includes("license")) {
@@ -92,11 +129,6 @@ exports.scrape = function(url, res) {
             if (License != undefined && License != '') {
                 json.License = License;
             }
-            $('a.button-download').filter(function() {
-                var data = $(this);
-                download_url = url + data.attr("href");
-                json.download_url = download_url;
-            })
 
 
             $("meta[name='description']").filter(function() {
@@ -126,23 +158,17 @@ exports.scrape = function(url, res) {
             json.image = image;
             image_download = 'http:' + image;
             if (image != undefined && image != "") {
-                var re = /[\w* ]+/i;
-                var title_img = re.exec(title)[0];
-                if (title_img == undefined || title_img == '') {
-                    title_img = 'pinshape';
-                }
-                title_img = title_img.toLowerCase().trim();
-                var patt1 = /\s/g;
-                title_img = title_img.replace(patt1, '_');
-                json.image = "images/full/" + title_img;
-                json.thumb = "images/thumb/" + title_img;
+                json.image = "images/" + json.short_title + ".png";
+                json.thumb = "images/" + json.short_title + "-thumb.png";
                 json.image_download = image_download;
             }
+            /*
             $("p.description").filter(function() {
                 var data = $(this);
                 main_description = toMarkdown(data.siblings('meta').attr("content"));
                 json.main_description = main_description;
             })
+            */
         }
         res.json(json);
 

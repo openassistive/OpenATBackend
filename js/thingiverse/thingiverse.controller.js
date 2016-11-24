@@ -87,8 +87,19 @@ exports.scrape = function(url, reponame, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Thingiverse)/ig;
             title = title.replace(rexp, ' ');
             json.title = title.trim();
+            
+            // Get the short_title. Equally important
+            // All short_titles should be the title shortened and ready for files
+            var short_title = json.title.toLowerCase();
+            // \W is any non-word char (e.g. ! a-ZA-X0-9_
+            var rexp = /([\W]+)/ig;
+            json.short_title = short_title.replace(rexp, '_');
+            
             json.License = $('div.thing-license').first().attr('title');
-            json.datemod = moment($('div.thing-header-data time').attr('datetime')).format("YYYY-MM-DD HH:mm");
+            
+            //Format date. Moment isnt good enough
+            json.datemod = moment($('div.thing-header-data time').attr('datetime'),'YYYY-MM-DD HH:mm:ss').format("YYYY-MM-DD HH:mm");
+            
             authors = "";
             $('div.thing-header-data a').each(function(index, item) {
 
@@ -103,7 +114,7 @@ exports.scrape = function(url, reponame, res) {
 
             });
             json.authors = authors;
-            json.download_url = $('a.thing-download-btn').attr('href');
+            json.download_url = 'http://www.thingiverse.com'+$('a.thing-download-btn').attr('href');
 
 
             $("meta[name=description]").filter(function() {
@@ -124,17 +135,8 @@ exports.scrape = function(url, reponame, res) {
             json.image = image;
             image_download = image;
             if (image != undefined && image != "") {
-                var re = /[\w* ]+/i;
-                var title_img = re.exec(title)[0];
-                if (title_img == undefined || title_img == '') {
-                    title_img = 'thingiverse';
-                }
-                title_img = title_img.toLowerCase().trim();
-                var patt1 = /\s/g;
-                title_img = title_img.replace(patt1, '_');
-
-                json.image = "images/full/" + title_img;
-                json.thumb = "images/thumb/" + title_img;
+                json.image = "images/" + json.short_title + ".png";
+                json.thumb = "images/" + json.short_title + "-thumb.png";
                 json.image_download= image_download;
             }
             $("div.description").filter(function() {

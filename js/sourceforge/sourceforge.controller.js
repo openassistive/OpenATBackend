@@ -141,9 +141,8 @@ exports.scrape = function(url, res) {
             })
             */
             if (image != undefined && image != "") {
-                var re = /[\w* ]+/i;
-                json.image = "images/full/" + short_title;
-                json.thumb = "images/thumb/" + short_title;
+                json.image = "images/" + short_title + ".png";
+                json.thumb = "images/" + short_title + "-thumb.png";
                 json.image_download = image_download;
             }
             $("p#description").filter(function() {

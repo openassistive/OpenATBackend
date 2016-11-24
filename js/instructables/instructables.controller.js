@@ -76,7 +76,10 @@ exports.scrape = function(url, res) {
             title = title.replace(rexp, ' ');
             json.title = title.trim();
             json.License = $('section#project-categories-and-license section.content a').text().trim();
-            json.datemod = moment($('meta[itemprop=datePublished]').attr('content')).format("YYYY-MM-DD HH:mm");
+            
+            
+            // Oct. 5, 2015, 8:12 a.m.
+            json.datemod = moment($('meta[itemprop=datePublished]').attr('content'),'MMM. D, YYYY, h:mm a').format("YYYY-MM-DD HH:mm");
             authors = "";
             $('span.author a[rel="author"]').each(function(index, item) {
 
@@ -89,7 +92,7 @@ exports.scrape = function(url, res) {
 
             });
             json.authors = authors;
-            json.download_url = $('div.pull-left a#download-pdf-btn-top').attr('data-return-url');
+            json.download_url = 'http://www.instructables.com'+$('div.pull-left a#download-pdf-btn-top').attr('data-return-url');
 
 
             $("meta[name=description]").filter(function() {
@@ -112,17 +115,8 @@ exports.scrape = function(url, res) {
             image_download = image;
 
             if (image != undefined && image != "") {
-                var re = /[\w* ]+/i;
-                var title_img = re.exec(title)[0];
-                if (title_img == undefined || title_img == '') {
-                    title_img = 'instructables';
-                }
-                title_img = title_img.toLowerCase().trim();
-                var patt1 = /\s/g;
-                title_img = title_img.replace(patt1, '_');
-
-                json.image = "images/full/" + title_img;
-                json.thumb = "images/thumb/" + title_img;
+                json.image = "images/" + json.short_title + ".png";
+                json.thumb = "images/" + json.short_title + "-thumb.png";
                 json.image_download = image_download;
 
             }

@@ -6,10 +6,12 @@ var express = require('express')
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 app.set('port', (process.env.PORT || 5000));
 
-
+if (!process.env.GitHubOAuth){
+   console.error('No GitHubOAuth env var set! Now quitting');
+   return null;
+}
 
 // Init stuff - this will eventually get removed once we move to the whole github pulling and updating 
 var mkdirp = require('mkdirp');
