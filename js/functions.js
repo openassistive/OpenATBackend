@@ -19,6 +19,11 @@ var GHOptions = {
 exports.writeFileToGithub = function(fileToSend,locationInGit) {
    var gh = Hubfs(GHOptions)
    // token auth 
+   /*
+   console.log(fileToSend)
+   return null;
+   */
+   
    fs.readFile(fileToSend, function (err,data) {
      if (err) {
        return console.log(err);
@@ -114,28 +119,36 @@ exports.SaveImages = function(image_url,filename) {
               });      
    });
 };
-
 exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
    var sharp = require('sharp');
    var tmp = require('tmp');
+   /*
+   console.log("image_url:"+image_url);
+   console.log("filename:"+filename);
+   console.log("locationInGit:"+locationInGit);
+   return null;
+   */
    tmp.file({ mode: parseInt('0644',8), prefix: 'openatimg-', postfix: '.jpg' },function _tempFileCreated(err, path, fd) {
      if (err) throw err;
      exports.download(image_url,path, function() {
-               var imaget = sharp(path)
-                 .resize(250, 250)
-                 .png()
-                 .toFile(filename+'-thumb.png', function(err) {
-                 });
-   
-                var imagel = sharp(path)
-                 .resize(500, 500)
-                 .png()
-                 .toFile(filename+'.png', function(err) {
-                 });  
-                 
-              });      
+      var imaget = sharp(path)
+         .resize(250, 250)
+         .png()
+         .toFile(filename+'-thumb.png', function(err) {
+            });
+
+      var imagel = sharp(path)
+         .resize(500, 500)
+         .png()
+         .toFile(filename+'.png', function(err) {
+            });
+      });      
    });
    //Now write to Github - NB - NOT ASYNC. QUICK FIX
-   exports.writeFileToGithub(filename+'-thumb.png',locationInGit+filename+'-thumb.png');
-   exports.writeFileToGithub(filename+'.png',locationInGit+filename+'.png');   
+   if (fs.existsSync(filename+'-thumb.png')) {
+      exports.writeFileToGithub(filename+'-thumb.png',locationInGit+filename+'-thumb.png');
+   }
+   if (fs.existsSync(filename+'.png')) {
+      exports.writeFileToGithub(filename+'.png',locationInGit+filename+'.png');   
+   }
 };
