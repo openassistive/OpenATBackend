@@ -1,0 +1,14 @@
+{
+  "name": "OpenATBackend Server",
+  "description": "The Backend for an OpenAT system",
+  "repository": "https://github.com/openassistive/OpenATBackend",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "api"],
+  "buildpacks": [{"url": "https://github.com/alex88/heroku-buildpack-vips.git"}, {"url":"heroku/node"}],
+  "env": {
+    "GitHubOAuth": {
+      "description": "The GitHub Personal Token. Create one here: https://github.com/settings/tokens",
+      "value": "secret"
+    }
+  }
+}

@@ -1,6 +1,9 @@
 OpenATBackend
 ================
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+
 OpenATBackend is a node server that has the following API routes:
 
 * GET /add/[site-id]/[site-specific-/-parts]
@@ -33,7 +36,18 @@ OpenATBackend is a node server that has the following API routes:
 It will return either success:short_title name or error:message
 
 
+To run
+======
 
+You will need to set an environment variable 'GitHubOAuth' with your [GitHub Personal Access Token](https://github.com/settings/tokens). 
+e.g. in your terminal:
+
+	export GitHubOAuth='787a8sd78a7d8a7d87adhhas'
+	git clone https://github.com/openassistive/OpenATBackend.git
+	npm install
+	node server.js 
+
+then navigate to http://localhost:5000 to access the server. 
 
 Notes:
 ======
