@@ -105,9 +105,7 @@ exports.scrape = function(url, res) {
             }
 
             json.License = License;
-            console.log($('a[name=user-content-license]').next().next().text());
-            json.datemod = moment($('span[itemprop=dateModified]').text().trim()).format("YYYY-MM-DD HH:mm");
-
+            json.datemod = moment($('relative-time').attr("datetime").trim()).format("YYYY-MM-DD HH:mm");
             if ($('span.num.text-emphasized').first().text().trim() != '0') {
                 download_url = url + '/releases';
             } else {
