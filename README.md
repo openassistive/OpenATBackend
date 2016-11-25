@@ -1,9 +1,6 @@
 OpenATBackend
 ================
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-
 OpenATBackend is a node server that has the following API routes:
 
 * GET /add/[site-id]/[site-specific-/-parts]
@@ -35,6 +32,7 @@ OpenATBackend is a node server that has the following API routes:
 
 It will return either success:short_title name or error:message
 
+If you want to see the kind of data it passes try [this page](http://rawgit.com/willwade/3662333cd64a26e6337d128aa4ecf1b7/raw/519db34c254504fd5bc6f3c734aa9ae7e10727f0/test.html).
 
 To run
 ======
@@ -48,6 +46,14 @@ e.g. in your terminal:
 	node server.js 
 
 then navigate to http://localhost:5000 to access the server. 
+
+
+To Deploy
+=========
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+
 
 Notes:
 ======
