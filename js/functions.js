@@ -5,6 +5,7 @@ var request = require('request');
 var http = require("http");
 var sharp = require('sharp');
 var Hubfs = require('hubfs.js')
+var toTitleCase = require('titlecase')
 
 var GHOptions = {
   owner: 'openassistive',
@@ -13,6 +14,19 @@ var GHOptions = {
    token: process.env.GitHubOAuth
   }
 }
+
+/* generate a shortTitle */
+exports.genShortTitle = function(strLongTitle) {
+   var short_title = toTitleCase(strLongTitle.trim());
+   //Now get Rid of spaces
+   short_title = short_title.replace(' ','');
+   // Lastly ditch any non-Word chars
+   // \W is any non-word char (e.g. ! a-ZA-X0-9_
+   var rexp = /([\W]+)/ig;
+   short_title = short_title.replace(rexp, '');
+   return short_title;
+};
+
 /* 
    writes file to github
 */
@@ -48,6 +62,7 @@ exports.writeDataToGithub = function(dataToSend,locationInGit) {
    return true;
    });
 }
+
 
 
 exports.generateMDFile = function(json) {
@@ -134,21 +149,24 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
       var imaget = sharp(path)
          .resize(250, 250)
          .png()
-         .toFile(filename+'-thumb.png', function(err) {
+         .toFile('download_image/' +filename+'-thumb.png', function(err) {
             });
 
       var imagel = sharp(path)
          .resize(500, 500)
          .png()
-         .toFile(filename+'.png', function(err) {
+         .toFile('download_image/' +filename+'.png', function(err) {
             });
       });      
    });
    //Now write to Github - NB - NOT ASYNC. QUICK FIX
-   if (fs.existsSync(filename+'-thumb.png')) {
-      exports.writeFileToGithub(filename+'-thumb.png',locationInGit+filename+'-thumb.png');
+   if (fs.existsSync('download_image/' +filename+'-thumb.png')) {
+      exports.writeFileToGithub('download_image/' +filename+'-thumb.png',locationInGit+filename+'-thumb.png');
    }
-   if (fs.existsSync(filename+'.png')) {
-      exports.writeFileToGithub(filename+'.png',locationInGit+filename+'.png');   
+   if (fs.existsSync('download_image/' +filename+'.png')) {
+      exports.writeFileToGithub('download_image/' +filename+'.png',locationInGit+filename+'.png');   
    }
 };
+
+
+

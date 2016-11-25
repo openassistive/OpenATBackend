@@ -83,14 +83,7 @@ exports.scrape = function(url, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Github)/ig;
             title = title.replace(rexp, ' ');
             json.title = title.trim();
-
-            // Get the short_title. Equally important
-            // All short_titles should be the title shortened and ready for files
-            var short_title = json.title.toLowerCase();
-            // \W is any non-word char (e.g. ! a-ZA-X0-9_
-            var rexp = /([\W]+)/ig;
-            json.short_title = short_title.replace(rexp, '_');
-
+            json.short_title = contentCreator.genShortTitle(json.title);            
             json.authors = $('span.author').text().trim();
 
             License = $('h1:contains("License")').first().next('p').text();

@@ -86,13 +86,7 @@ exports.scrape = function(url, reponame, res) {
             title = title.replace(rexp, ' ');
             json.title = title.trim();
             
-            // Get the short_title. Equally important
-            // All short_titles should be the title shortened and ready for files
-            var short_title = json.title.toLowerCase();
-            // \W is any non-word char (e.g. ! a-ZA-X0-9_
-            var rexp = /([\W]+)/ig;
-            json.short_title = short_title.replace(rexp, '_');
-            
+            json.short_title = contentCreator.genShortTitle(json.title);            
             json.License = $('div.thing-license').first().attr('title');
             
             //Format date. Moment isnt good enough

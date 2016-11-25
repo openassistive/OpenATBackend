@@ -80,14 +80,7 @@ exports.scrape = function(url, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Sourceforge)/ig;
             title = title.replace(rexp, '');
             json.title = title.trim();
-            
-            // Get the short_title. Equally important
-            // All short_titles should be the title shortened and ready for files
-            short_title = json.title.toLowerCase();
-            // \W is any non-word char (e.g. ! a-ZA-X0-9_
-            var rexp = /([\W]+)/ig;
-            json.short_title = short_title.replace(rexp, '_');
-
+            json.short_title = contentCreator.genShortTitle(json.title);            
             json.License = $('section#project-categories-and-license section.content a').text().trim();
             json.datemod = moment($('time.dateUpdated').text().trim()).format("YYYY-MM-DD HH:mm");
             authors = "";

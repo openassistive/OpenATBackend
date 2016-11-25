@@ -71,13 +71,7 @@ exports.scrape = function(url, res) {
                 var pinshape_JSON = JSON.parse(data.attr("data-id"));
 
                json.title= pinshape_JSON.name;
-               // Get the short_title. Equally important
-               // All short_titles should be the title shortened and ready for files
-               var short_title = json.title.toLowerCase();
-               // \W is any non-word char (e.g. ! a-ZA-X0-9_
-               var rexp = /([\W]+)/ig;
-               json.short_title = short_title.replace(rexp, '_');
-
+               json.short_title = contentCreator.genShortTitle(json.title);                                    
                json.download_url = pinshape_JSON.zip_file.url;
                json.License =  pinshape_JSON.usage_license;
 
