@@ -29,8 +29,6 @@ exports.scrape_Sourceforge = function(req, res) {
     exports.scrape(url, res);
 };
 exports.scrape = function(url, res) {
-    console.log(url);
-
     request(url, function(error, response, html) {
         if (!error) {
             var $ = cheerio.load(html);
@@ -63,7 +61,7 @@ exports.scrape = function(url, res) {
                 original_url: "",
                 short_title: ""
             };
-
+            
             json.type = "software";
             json.project_url = $('a#homepage').attr("href");
             json.original_url = url;
@@ -150,8 +148,10 @@ exports.scrape = function(url, res) {
                 main_description = toMarkdown(data.html());
                 json.main_description = main_description;
             })
+          
+          res.json(json);
+        } else {
+            res.json({ error: "Sorry. Server was slow to respond. Try later or get a new internet"});
         }
-
-        res.json(json);
     })
 };

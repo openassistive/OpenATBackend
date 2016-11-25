@@ -30,7 +30,6 @@ exports.scrape_Pinshape = function(req, res) {
 };
 
 exports.scrape = function(url, res) {
-    console.log(url);
     request(url, function(error, response, html) {
         if (!error) {
             var $ = cheerio.load(html);

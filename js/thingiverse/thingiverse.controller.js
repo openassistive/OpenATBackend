@@ -39,8 +39,6 @@ exports.scrape_Thingiverse = function(req, res) {
     exports.scrape(url, reponame, res);
 };
 exports.scrape = function(url, reponame, res) {
-
-    console.log(url);
     var title = "",
         datemod = "",
         authors = "",
