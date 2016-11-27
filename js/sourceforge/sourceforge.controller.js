@@ -132,8 +132,8 @@ exports.scrape = function(url, res) {
             })
             */
             if (image != undefined && image != "") {
-                json.image = "images/" + short_title + ".png";
-                json.thumb = "images/" + short_title + "-thumb.png";
+                json.image = "images/" + json.short_title + ".png";
+                json.thumb = "images/" + json.short_title + "-thumb.png";
                 json.image_download = image_download;
             }
             $("p#description").filter(function() {
