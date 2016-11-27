@@ -32,7 +32,7 @@ OpenATBackend is a node server that has the following API routes:
 
 It will return either success:short_title name or error:message
 
-If you want to see the kind of data it passes try [this page](http://rawgit.com/willwade/3662333cd64a26e6337d128aa4ecf1b7/raw/519db34c254504fd5bc6f3c734aa9ae7e10727f0/test.html).
+If you want to see the kind of data it passes try [this page](https://rawgit.com/willwade/3662333cd64a26e6337d128aa4ecf1b7/raw/fd696acfcef2359ecdca74c09b408f0afc3e2c06/test.html).
 
 To run
 ======
