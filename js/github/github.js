@@ -10,25 +10,9 @@ exports.scrape_Github = function(req, res) {
 
     //var url = 'http://www.github.com/' + req.params.id + '/' + req.params.url;
     var url = 'http://www.github.com';
-    var reponame = "github";
-    if (req.params.url0 != undefined && req.params.url0 != '') {
-        url += '/' + req.params.url0;
-    }
-    if (req.params.url1 != undefined && req.params.url1 != '') {
-        url += '/' + req.params.url1;
-    }
-    if (req.params.url2 != undefined && req.params.url2 != '') {
-        url += '/' + req.params.url2;
-    }
-    if (req.params.url3 != undefined && req.params.url3 != '') {
-        url += '/' + req.params.url3;
-    }
-    if (req.params.url4 != undefined && req.params.url4 != '') {
-        url += '/' + req.params.url4;
-    }
-    if (req.params.url5 != undefined && req.params.url5 != '') {
-        url += '/' + req.params.url5;
-    }
+    url += '/' + req.params[0];
+
+    console.log(url);
 
     exports.scrape(url, res);
 };
@@ -83,7 +67,7 @@ exports.scrape = function(url, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Github)/ig;
             title = title.replace(rexp, ' ');
             json.title = title.trim();
-            json.short_title = contentCreator.genShortTitle(json.title);            
+            json.short_title = contentCreator.genShortTitle(json.title);
             json.authors = $('span.author').text().trim();
 
             License = $('h1:contains("License")').first().next('p').text();
@@ -96,7 +80,8 @@ exports.scrape = function(url, res) {
             }
 
             json.License = License;
-            json.datemod = moment($('relative-time').attr("datetime").trim()).format("YYYY-MM-DD HH:mm");
+            console.log(json);
+            //json.datemod = moment($('relative-time').attr("datetime").trim()).format("YYYY-MM-DD HH:mm");
             if ($('span.num.text-emphasized').first().text().trim() != '0') {
                 download_url = url + '/releases';
             } else {

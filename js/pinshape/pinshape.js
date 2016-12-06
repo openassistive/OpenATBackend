@@ -64,14 +64,14 @@ exports.scrape = function(url, res) {
             json.type = "hardware";
             json.project_url = url;
             json.original_url = url;
-                        
+
             //Sneaky. This may get pulled in the future! The below is left in the comments just incase
             $('a.repin.space-right').filter(function() {
                 var data = $(this);
                 var pinshape_JSON = JSON.parse(data.attr("data-id"));
 
                json.title= pinshape_JSON.name;
-               json.short_title = contentCreator.genShortTitle(json.title);                                    
+               json.short_title = contentCreator.genShortTitle(json.title);
                json.download_url = pinshape_JSON.zip_file.url;
                json.License =  pinshape_JSON.usage_license;
 
@@ -82,20 +82,20 @@ exports.scrape = function(url, res) {
                    json.authors = authors;
                })
 
-               json.datemod =  moment(pinshape_JSON.updated_at).format("YYYY-MM-DD HH:mm"); 
+               json.datemod =  moment(pinshape_JSON.updated_at).format("YYYY-MM-DD HH:mm");
                json.project_url =  url;
                json.description = toMarkdown(pinshape_JSON.description);
                json.original_url =  url;
             })
-            
+
             $('a.button-download').filter(function() {
                 var data = $(this);
                 download_url = url + data.attr("href");
                 json.download_url = download_url;
             })
 
-            /*               
-              
+            /*
+
             $('title').filter(function() {
                 var data = $(this);
                 title = data.text().trim();

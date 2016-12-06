@@ -73,10 +73,10 @@ exports.scrape = function(url, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Instructables)/ig;
             title = title.replace(rexp, ' ');
             json.title = title.trim();
-            json.short_title = contentCreator.genShortTitle(json.title);                                    
+            json.short_title = contentCreator.genShortTitle(json.title);
             json.License = $('section#project-categories-and-license section.content a').text().trim();
-            
-            
+
+
             // Oct. 5, 2015, 8:12 a.m.
             json.datemod = moment($('meta[itemprop=datePublished]').attr('content'),'MMM. D, YYYY, h:mm a').format("YYYY-MM-DD HH:mm");
             authors = "";

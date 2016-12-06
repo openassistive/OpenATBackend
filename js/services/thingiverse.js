@@ -85,13 +85,13 @@ exports.scrape = function(url, reponame, res) {
             var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Thingiverse)/ig;
             title = title.replace(rexp, ' ');
             json.title = title.trim();
-            
-            json.short_title = contentCreator.genShortTitle(json.title);            
+
+            json.short_title = contentCreator.genShortTitle(json.title);
             json.License = $('div.thing-license').first().attr('title');
-            
+
             //Format date. Moment isnt good enough
             json.datemod = moment($('div.thing-header-data time').attr('datetime'),'YYYY-MM-DD HH:mm:ss').format("YYYY-MM-DD HH:mm");
-            
+
             authors = "";
             $('div.thing-header-data a').each(function(index, item) {
 
@@ -139,7 +139,7 @@ exports.scrape = function(url, reponame, res) {
             })
 
         }
-        
+
         res.json(json);
 
     });
