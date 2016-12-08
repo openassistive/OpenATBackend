@@ -1,6 +1,6 @@
 var Router = require('express').Router;
 
-module.exports.allServices = [
+var allServices = module.exports.allServices = [
   {
     name: 'github'
   },
@@ -20,16 +20,16 @@ module.exports.allServices = [
 
 var createServiceRouter = function(service) {
   var router = new Router();
-  var handler = require('./' + service.name);
-  router.get(/\/(.+)/, handler);
+  var handler = require('./' + service.name).handler;
+  router.get('/', handler);
   return router;
 };
 
 module.exports.getRouters = function(app) {
-  return exports.allServices.map(function(service) {
+  return allServices.map(function(service) {
     return {
       name: service.name,
-      router: createServiceRouter(service.name)
+      router: createServiceRouter(service)
     }
   });
 };

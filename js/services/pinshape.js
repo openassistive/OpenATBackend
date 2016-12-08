@@ -167,3 +167,5 @@ exports.scrape = function(url, res) {
 
     })
 };
+
+exports.handler = exports.scrape_Pinshape;

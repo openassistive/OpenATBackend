@@ -146,3 +146,5 @@ exports.scrape = function(url, reponame, res) {
 
 
 };
+
+exports.handler = exports.scrape_Thingiverse;

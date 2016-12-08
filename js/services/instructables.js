@@ -132,3 +132,5 @@ exports.scrape = function(url, res) {
         res.json(json);
     })
 };
+
+exports.handler = exports.scrape_Instructables;
