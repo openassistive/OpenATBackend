@@ -2,11 +2,15 @@ var express = require('express')
   , cors = require('cors')
   , app = express()
   , bodyParser = require('body-parser')
+  , path = require('path');
   
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.set('port', (process.env.PORT || 5000));
+app.use('/docs/v1/', express.static(path.join(__dirname, 'docs'), {
+  maxAge: 31557600000
+}));
 
 if (!process.env.GitHubOAuth){
    console.error('No GitHubOAuth env var set! Now quitting');

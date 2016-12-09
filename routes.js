@@ -3,26 +3,39 @@
  */
 
 'use strict';
+var path = require('path');
+var Router = require('express').Router;
 var services = require('./js/services');
 
+var setupApi = function(app, cors) {
+  var api = new Router();
+  services.getRouters().forEach(function(service) {
+    api.use('/add/' + service.name, service.router);
+  });
+  api.use('/save', require('./js/savejson'));
+  app.use('/api/v1/', cors(), api);
+};
+
+var setupDocs = function(app) {
+  app.get('/docs/v1/', function(req, res) {
+    res.sendFile(path.join(__dirname, 'docs', 'index.html'));
+  });
+};
+
 module.exports = function(app, cors) {
+  // to allow cors for set domains use the following..
+  var whitelist = ['http://example1.com', 'http://example2.com'];
+  var corsOptions = {
+    origin: function(origin, callback){
+       var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+       callback(originIsWhitelisted ? null : 'Bad Request', originIsWhitelisted);
+    }
+  };
 
-   // to allow cors for set domains use the following..
-    var whitelist = ['http://example1.com', 'http://example2.com'];
-    var corsOptions = {
-      origin: function(origin, callback){
-         var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
-         callback(originIsWhitelisted ? null : 'Bad Request', originIsWhitelisted);
-      }
-    };
+  setupApi(app, cors);
+  setupDocs(app);
 
-    services.getRouters().forEach(function(service) {
-      app.use('/add/' + service.name, cors(), service.router);
-    });
-
-    app.use('/save', cors(), require('./js/savejson'));
-    app.route('/*')
-        .get(function(req, res) {
-            res.json({ error: "Sorry, this site is not supported" });
-        });
+  app.route('/*').get(function(req, res) {
+    res.json({ error: "Sorry, this site is not supported" });
+  });
 };

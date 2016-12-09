@@ -3,7 +3,7 @@
 var fs = require('fs');
 var request = require('request');
 var http = require("http");
-//var sharp = require('sharp');
+var sharp = require('sharp');
 var Hubfs = require('hubfs.js')
 var toTitleCase = require('titlecase')
 

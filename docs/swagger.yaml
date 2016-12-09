@@ -1,0 +1,84 @@
+---
+swagger: "2.0"
+info:
+  description: "This is the documentation for the OpenATBackend API."
+  version: "1.0.0"
+  title: "OpenATBackend"
+  termsOfService: "http://openatbackend.com/terms/"
+  contact:
+    email: "info@openatbackend.com"
+  license:
+    name: "MIT"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "openatbackend-test.herokuapp.com"
+basePath: "/api/v1/"
+schemes:
+ - https
+tags:
+- name: "add"
+  description: "Get a project information"
+paths:
+  /add/{service}:
+    get:
+      tags:
+      - "add"
+      summary: "Get information about the project"
+      description: "Get information about the project"
+      operationId: "addService"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "service"
+        in: "path"
+        description: "The name of the service"
+        required: true
+        type: "string"
+        items:
+          type: "string"
+          enum:
+          - "github"
+          - "instructables"
+          - "pinshape"
+          - "sourceforge"
+          - "thingiverse"
+      - name: "path"
+        in: "query"
+        description: "The path to get the project"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Project"
+        400:
+          description: "Invalid project path"
+
+definitions:
+  Project:
+    type: "object"
+    required:
+    - "title"
+    properties:
+      title:
+        type: "string"
+      type:
+        type: "string"
+      datemod:
+        type: "string"
+      authors:
+        type: "string"
+      License:
+        type: "string"
+      download_url:
+        type: "string"
+      project_url:
+        type: "string"
+      description:
+        type: "string"
+      image:
+        type: "string"
+      original_url:
+        type: "string"
+      thumv:
+        type: "string"
