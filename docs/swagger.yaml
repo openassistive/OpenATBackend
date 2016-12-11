@@ -1,56 +1,85 @@
 ---
 swagger: "2.0"
 info:
-  description: "This is the documentation for the OpenATBackend API."
+  description: |-
+    This API serves as a backend for the **Open Assistive Technology** site, 
+    which collate all open source hardware and software projects around the 
+    web that aim to help someone with disabilities (i.e. Assistive Technology).
   version: "1.0.0"
-  title: "OpenATBackend"
-  termsOfService: "http://openatbackend.com/terms/"
+  title: "Open Assistive Technology Backend"
   contact:
-    email: "info@openatbackend.com"
+    email: "info@openassistive.org"
   license:
     name: "MIT"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "openatbackend-test.herokuapp.com"
-basePath: "/api/v1/"
+  x-logo:
+    url: ""
+#host: "openatbackend-test.herokuapp.com"
+#basePath: "/api/v1/"
+#schemes:
+ #- https
+host: "api.openassistive.org"
+basePath: "/v1/"
 schemes:
- - https
+ - http
 tags:
-- name: "add"
+- name: "scraper service"
   description: "Get a project information"
 paths:
-  /add/{service}:
+  /service/{service}/projects:
     get:
       tags:
-      - "add"
-      summary: "Get information about the project"
-      description: "Get information about the project"
-      operationId: "addService"
+      - "scraper service"
+      summary: "Retrieves meta-data information for a project"
+      description:  "Scrapes for a project page to get important meta-data information."
+      operationId: "scrapeProject"
       produces:
       - "application/json"
       parameters:
       - name: "service"
         in: "path"
-        description: "The name of the service"
+        description: "The service name"
         required: true
         type: "string"
-        items:
-          type: "string"
-          enum:
-          - "github"
-          - "instructables"
-          - "pinshape"
-          - "sourceforge"
-          - "thingiverse"
+        enum:
+        - "github"
+        - "instructables"
+        - "pinshape"
+        - "sourceforge"
+        - "thingiverse"
       - name: "path"
         in: "query"
-        description: "The path to get the project"
+        description: "The path of the project page in the selected service."
         required: true
         type: "string"
+        example: "/lemol/coj"
       responses:
         200:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Project"
+        400:
+          description: "Invalid project path"
+
+  /projects/saved/:
+    post:
+      summary: "Save project meta-data for the front-end"
+      description: "Save project meta-data for the front-end"
+      operationId: "saveProject"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        description: "Project meta-data object to be saved"
+        required: true
+        schema:
+          $ref: "#/definitions/Project"
+      responses:
+        200:
+          description: "successful operation"
         400:
           description: "Invalid project path"
 
@@ -80,5 +109,33 @@ definitions:
         type: "string"
       original_url:
         type: "string"
-      thumv:
+      thumb:
         type: "string"
+    example:
+      short_title: "sawat"
+      title: "SAW - Special Access to Windows"
+      type: "software"
+      authors: "mlundalv, stuartaw, walsh_jc"
+      License: "GNU General Public License version 3.0 (GPLv3)"
+      datemod: "2016-10-22 00:00"
+      download_url: "http://www.sourceforge.net//projects/sawat/files/latest/download"
+      project_url: "http://www.oatsoft.org/Software/SpecialAccessToWindows"
+      description: |-
+        SAW - Special Access to Windows download. SAW - Special Access to Windows 
+        2016-10-22 19:28:58 free download. SAW - Special Access to Windows 
+        SAW - Special Access to Windows - a programmable on-screen keyboard.
+      main_description: |-
+        SAW - Special Access to Windows - is a programmable on-screen keyboard. 
+        It is a powerful tool for providing Access to the Windows operating system 
+        for people who need alternative Switch or Pointing device input options.  
+        \nThe new SAW 6 version - supported by the AEGIS project 
+        ([http://www.aegis-project.eu/](http://www.aegis-project.eu/)) - is now 
+        available. It is fully Windows 7-10 compatible, supports Unicode, 
+        includes its own \"Blade\" word prediction and abbreviation expansion engine, 
+        can interact with the CCF-SymbolServer for graphic symbol support 
+        ([http://conceptcoding.org/](http://conceptcoding.org/)), and adds several 
+        other feautures to make creating interfaces easy for those who use alternative 
+        inputs.
+      image: "images/full/saw"
+      thumb: "images/thumb/saw"
+      original_url: "https://github.com/alandmoore/wcgbrowser"
