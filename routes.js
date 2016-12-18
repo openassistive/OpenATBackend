@@ -4,6 +4,7 @@
 
 'use strict';
 var path = require('path');
+var url = require('url');
 var Router = require('express').Router;
 var services = require('./js/services');
 
@@ -12,8 +13,8 @@ var setupApi = function(app, cors) {
   services.getRouters().forEach(function(service) {
     api.use('/' + service.name + '/project', service.router);
   });
-  app.use('/v1/serice', cors(), api);
-  api.use('/v1/projects/saved', require('./js/savejson'));
+  app.use('/v1/service', cors(), api);
+  api.use('/v1/projects/save', require('./js/savejson'));
 };
 
 var setupDocs = function(app) {

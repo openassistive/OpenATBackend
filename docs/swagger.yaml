@@ -18,7 +18,11 @@ info:
 #basePath: "/api/v1/"
 #schemes:
  #- https
-host: "api.openassistive.org"
+#host: "api.openassistive.org"
+#basePath: "/v1/"
+#schemes:
+ #- http
+host: "localhost:5000"
 basePath: "/v1/"
 schemes:
  - http
@@ -26,7 +30,7 @@ tags:
 - name: "scraper service"
   description: "Get a project information"
 paths:
-  /service/{service}/projects:
+  /service/{service}/project:
     get:
       tags:
       - "scraper service"
@@ -55,13 +59,13 @@ paths:
         example: "/lemol/coj"
       responses:
         200:
-          description: "successful operation"
+          description: "Successful operation"
           schema:
             $ref: "#/definitions/Project"
         400:
-          description: "Invalid project path"
+          description: "Project not found"
 
-  /projects/saved/:
+  /projects/save:
     post:
       summary: "Save project meta-data for the front-end"
       description: "Save project meta-data for the front-end"
@@ -79,7 +83,7 @@ paths:
           $ref: "#/definitions/Project"
       responses:
         200:
-          description: "successful operation"
+          description: "Successful operation"
         400:
           description: "Invalid project path"
 
