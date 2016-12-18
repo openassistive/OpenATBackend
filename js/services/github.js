@@ -29,6 +29,11 @@ exports.handler = function(req, res) {
       result.original_url = url;
 
       result.title = $('h1').first().text().trim();
+      var breakIndex = result.title.indexOf('\n');
+
+      if (breakIndex !== -1) {
+        result.title = result.title.substr(0, breakIndex);
+      }
 
       if (!result.title || result.title == '404') {
         throw { text: 'Project not found.', status: 400 };
@@ -43,7 +48,11 @@ exports.handler = function(req, res) {
         || $('h2:contains("License")').first().next('p').text()
         || $('h3:contains("License")').first().next('p').text();
 
-      result.datemod = moment($('relative-time').attr("datetime").trim()).format("YYYY-MM-DD HH:mm");
+      try {
+        result.datemod = moment($('relative-time').attr("datetime").trim()).format("YYYY-MM-DD HH:mm");
+      }
+      catch(ex) {
+      }
 
       if ($('span.num.text-emphasized').first().text().trim() != '0') {
           result.download_url = url + '/releases';
@@ -87,6 +96,7 @@ exports.handler = function(req, res) {
           .json({ error: err.text });
       }
 
+      console.log(err);
       return res
         .status(500)
         .json({ error: "Sorry. There was problems retrieving the information."});
