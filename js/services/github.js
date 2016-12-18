@@ -3,23 +3,25 @@ var contentCreator = require('../functions');
 var moment = require('moment');
 var scraperjs = require('scraperjs');
 
-exports.scrape = function(req, res) {
+exports.handler = function(req, res) {
   var url = req.projectUrl;
   scraperjs.StaticScraper.create(url)
     .scrape(function($) {
 
       var result = {
-        title        : "",
-        type         : "",
-        authors      : "",
-        license      : "",
-        datemod      : "",
-        download_url : "",
-        project_url  : "",
-        description  : "",
-        image        : "",
-        thumb        : "",
-        original_url : ""
+        title            : "",
+        short_title      : "",
+        type             : "",
+        authors          : "",
+        license          : "",
+        datemod          : "",
+        download_url     : "",
+        project_url      : "",
+        description      : "",
+        main_description : "",
+        image            : "",
+        thumb            : "",
+        original_url     : ""
       };
 
       result.type = "software";
@@ -91,4 +93,3 @@ exports.scrape = function(req, res) {
     });
 };
 
-exports.handler = exports.scrape;

@@ -101,7 +101,7 @@ definitions:
         type: "string"
       authors:
         type: "string"
-      License:
+      license:
         type: "string"
       download_url:
         type: "string"
@@ -120,7 +120,7 @@ definitions:
       title: "SAW - Special Access to Windows"
       type: "software"
       authors: "mlundalv, stuartaw, walsh_jc"
-      License: "GNU General Public License version 3.0 (GPLv3)"
+      license: "GNU General Public License version 3.0 (GPLv3)"
       datemod: "2016-10-22 00:00"
       download_url: "http://www.sourceforge.net//projects/sawat/files/latest/download"
       project_url: "http://www.oatsoft.org/Software/SpecialAccessToWindows"
