@@ -15,7 +15,7 @@ info:
   x-logo:
     url: ""
 host: "openatbackend-test.herokuapp.com"
-basePath: "/api/v1/"
+basePath: "/v1/"
 schemes:
  - https
 #host: "api.openassistive.org"
