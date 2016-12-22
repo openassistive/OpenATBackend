@@ -96,7 +96,7 @@ exports.scrape = function(url, res) {
             }
 
             json.License = License;
-            json.datemod = moment($('relative-time').attr("datetime").trim()).format("YYYY-MM-DD HH:mm");
+            json.datemod = moment($('relative-time').attr("datetime")).format("YYYY-MM-DD HH:mm");
             if ($('span.num.text-emphasized').first().text().trim() != '0') {
                 download_url = url + '/releases';
             } else {
