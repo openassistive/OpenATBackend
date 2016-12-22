@@ -16,12 +16,12 @@ if (!process.env.GitHubOAuth){
 // Init stuff - this will eventually get removed once we move to the whole github pulling and updating 
 var mkdirp = require('mkdirp');
 
-mkdirp('download_image', function (err) {
+mkdirp('./tmp/download_image', function (err) {
     if (err) console.error(err)
     else console.log('Could not make download_image dir')
 });
 
-mkdirp('output', function (err) {
+mkdirp('./tmp/output', function (err) {
     if (err) console.error(err)
     else console.log('Could not make output dir')
 });
