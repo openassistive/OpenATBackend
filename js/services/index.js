@@ -33,7 +33,7 @@ var allServices = module.exports.allServices = [
     baseUrl: 'http://www.sourceforge.com/',
     projectPath: {
       skip: 0,
-      take: 2
+      take: 1
     }
   },
   {
@@ -65,6 +65,7 @@ var createServiceRouter = function(service) {
 
   router.get('/', function(req, res, next) {
     req.projectUrl = getProjectUrl(service, req.query.path);
+    req.repoPath = url.parse(req.projectUrl).pathname;
     handler(req, res, next);
   });
 
