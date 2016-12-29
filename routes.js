@@ -14,7 +14,7 @@ var setupApi = function(app, cors) {
     api.use('/' + service.name + '/project', service.router);
   });
   app.use('/v1/service', cors(), api);
-  api.use('/v1/projects/save', require('./js/savejson'));
+  api.use('/v1/project/save', require('./js/savejson'));
 };
 
 var setupDocs = function(app) {

@@ -65,7 +65,7 @@ paths:
         400:
           description: "Project not found"
 
-  /projects/save:
+  /project/save:
     post:
       summary: "Save project meta-data for the front-end"
       description: "Save project meta-data for the front-end"
