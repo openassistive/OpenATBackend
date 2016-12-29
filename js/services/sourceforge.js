@@ -6,6 +6,7 @@ var toMarkdown = require('to-markdown');
 
 exports.handler = function(req, res) {
   var url = req.projectUrl;
+
   scraperjs.StaticScraper.create(url)
     .scrape(function($) {
 
@@ -13,7 +14,7 @@ exports.handler = function(req, res) {
         title: "",
         type: "",
         authors: "",
-        license: "",
+        License: "",
         datemod: "",
         download_url: "",
         project_url: "",
@@ -29,9 +30,9 @@ exports.handler = function(req, res) {
       result.project_url = $('a#homepage').attr("href");
       result.original_url = url;
 
-      result.title = $('div#project-title h1').text().trim();
+      result.title = $('div#project-title h1').text().trim() || '404';
 
-      if (!result.title || result.title == '404') {
+      if (result.title == '404') {
         throw { text: 'Project not found.', status: 400 };
       }
 
@@ -39,7 +40,7 @@ exports.handler = function(req, res) {
       result.title = result.title.replace(rexp, ' ').trim();
       result.short_title = contentCreator.genShortTitle(result.title);
 
-      result.license = $('section#project-categories-and-license section.content a').text().trim();
+      result.License = $('section#project-categories-and-license section.content a').text().trim();
 
       result.datemod = moment($('time.dateUpdated').text().trim()).format("YYYY-MM-DD HH:mm");
 

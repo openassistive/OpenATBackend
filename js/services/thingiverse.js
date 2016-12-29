@@ -1,150 +1,100 @@
 'use strict';
-var fs = require('fs');
-var request = require('request');
-var cheerio = require('cheerio');
-var http = require('http');
 var contentCreator = require('../functions');
-var toMarkdown = require('to-markdown');
 var moment = require('moment');
+var scraperjs = require('scraperjs');
+var toMarkdown = require('to-markdown');
 
-var image_download = "";
+exports.handler = function(req, res) {
+  var url = req.projectUrl;
 
-exports.scrape_Thingiverse = function(req, res) {
-    var url = 'http://www.thingiverse.com'; // + req.params.id; // + '/' + req.params.url;
-    var reponame = "thingiverse";
-    if (req.params.url0 != undefined && req.params.url0 != '') {
-        url += '/' + req.params.url0;
-        reponame = req.params.url0;
-    }
-    if (req.params.url1 != undefined && req.params.url1 != '') {
-        url += '/' + req.params.url1;
-        reponame = req.params.url1;
-    }
-    if (req.params.url2 != undefined && req.params.url2 != '') {
-        url += '/' + req.params.url2;
-        reponame = req.params.url2;
-    }
-    if (req.params.url3 != undefined && req.params.url3 != '') {
-        url += '/' + req.params.url3;
-        reponame = req.params.url3;
-    }
-    if (req.params.url4 != undefined && req.params.url4 != '') {
-        url += '/' + req.params.url4;
-        reponame = req.params.url4;
-    }
-    if (req.params.url5 != undefined && req.params.url5 != '') {
-        url += '/' + req.params.url5;
-        reponame = req.params.url5;
-    }
-    exports.scrape(url, reponame, res);
-};
-exports.scrape = function(url, reponame, res) {
-    var title = "",
-        datemod = "",
-        authors = "",
-        License = "",
-        download_url = "",
-        project_url = "",
-        description = "",
-        image = "",
-        original_url = "",
-        main_description = "",
-        image_download = "",
-        enable_download = 1;
+  scraperjs.StaticScraper.create(url)
+    .scrape(function($) {
 
-    request(url, function(error, response, html) {
-        if (!error) {
-            var $ = cheerio.load(html);
+      var result = {
+        title: "",
+        type: "",
+        authors: "",
+        License: "",
+        datemod: "",
+        download_url: "",
+        project_url: "",
+        description: "",
+        main_description: "",
+        image: "",
+        thumb: "",
+        original_url: "",
+        short_title: ""
+      };
 
+      result.type = "hardware";
+      result.project_url = url;
+      result.original_url = url;
+      result.title = $('title').text().trim() || 'About THING - Thingiverse';
 
-            var json = {
-                title: "",
-                type: "",
-                authors: "",
-                License: "",
-                datemod: "",
-                download_url: "",
-                project_url: "",
-                description: "",
-                main_description: "",
-                image: "",
-                thumb: "",
-                original_url: ""
-            };
+      if (result.title === 'About THING - Thingiverse' || result.title === '404 Not Found') {
+          throw { text: 'Project not found.', status: 400 };
+      }
 
-            json.type = "hardware";
-            json.project_url = url;
-            json.original_url = url;
-            title = $('title').text().trim();
-            if (title == undefined || title == '' || title == '404') {
-                title = 'thingiverse - Page not found';
-                enable_download = 0;
-                res.json({ error: "page not found"});
-                return;
-            }
-            var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Thingiverse)/ig;
-            title = title.replace(rexp, ' ');
-            json.title = title.trim();
+      var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Thingiverse)/ig;
+      var rexp2 = /(- Thingiverse)/ig;
+      result.title = result.title.replace(rexp, ' ').trim();
+      result.title = result.title.replace(rexp2, '').trim();
 
-            json.short_title = contentCreator.genShortTitle(json.title);
-            json.License = $('div.thing-license').first().attr('title');
+      result.short_title = contentCreator.genShortTitle(result.title);
+      result.License = $('div.thing-license').first().attr('title');
+      result.datemod = moment($('div.thing-header-data time').attr('datetime'),'YYYY-MM-DD HH:mm:ss').format("YYYY-MM-DD HH:mm");
 
-            //Format date. Moment isnt good enough
-            json.datemod = moment($('div.thing-header-data time').attr('datetime'),'YYYY-MM-DD HH:mm:ss').format("YYYY-MM-DD HH:mm");
+      result.authors = "";
 
-            authors = "";
-            $('div.thing-header-data a').each(function(index, item) {
-
-
-                if (item.children[0].data != undefined && !authors.includes(item.children[0].data)) {
-                    if (index > 0) {
-                        authors += ', ';
-                    }
-                    authors = authors + item.children[0].data; //.text().trim();
-
-                }
-
-            });
-            json.authors = authors;
-            json.download_url = 'http://www.thingiverse.com'+$('a.thing-download-btn').attr('href');
-
-
-            $("meta[name=description]").filter(function() {
-                var data = $(this);
-                description = data.attr('content');
-
-                json.description = description;
-            })
-            var img_url = $("div.thing-page-image img").first();
-            //console.log(img_url);
-
-            if (img_url == undefined || img_url == "") {
-                img_url = $('img').first();
-                image = img_url.attr('src');
-            } else {
-                image = img_url[0].attribs['data-cfsrc'];
-            }
-            json.image = image;
-            image_download = image;
-            if (image != undefined && image != "") {
-                json.image = "images/" + json.short_title + ".png";
-                json.thumb = "images/" + json.short_title + "-thumb.png";
-                json.image_download= image_download;
-            }
-            $("div.description").filter(function() {
-                var data = $(this);
-                main_description = toMarkdown(data.html());
-
-                json.main_description = main_description;
-            })
-
+      $('div.thing-header-data a').each(function(index, item) {
+        if (item.children[0].data != undefined && !result.authors.includes(item.children[0].data)) {
+          if (index > 0) {
+              result.authors += ', ';
+          }
+          result.authors += item.children[0].data; //.text().trim();
         }
+      });
 
-        res.json(json);
+      result.download_url = 'http://www.thingiverse.com'+$('a.thing-download-btn').attr('href');
 
+      $("meta[name=description]").filter(function() {
+        result.description = $(this).attr('content');
+      });
+
+      var img_url = $("div.thing-page-image img").first();
+
+      if (img_url == undefined || img_url == "") {
+        img_url = $('img').first();
+        result.image_download = img_url.attr('src');
+      } else {
+        result.image_download = img_url[0].attribs['data-cfsrc'];
+      }
+
+      if (result.image_download != undefined && result.image_download != "") {
+        result.image = "images/" + result.short_title + ".png";
+        result.thumb = "images/" + result.short_title + "-thumb.png";
+      }
+
+      $("div.description").filter(function() {
+        var data = $(this);
+        result.main_description = toMarkdown(data.html());
+      });
+
+      return result;
+    })
+    .then(function(result) {
+      return res.json(result);
+    })
+    .catch(function(err) {
+      if(err.status) {
+        return res
+          .status(err.status)
+          .json({ error: err.text });
+      }
+
+      return res
+        .status(500)
+        .json({ error: "Sorry. There was problems retrieving the information."});
     });
 
-
 };
-
-exports.handler = exports.scrape_Thingiverse;

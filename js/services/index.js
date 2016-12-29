@@ -7,6 +7,7 @@ var allServices = module.exports.allServices = [
   {
     name: 'github',
     baseUrl: 'http://www.github.com/',
+    prefix: '',
     projectPath: {
       skip: 0,
       take: 2
@@ -15,22 +16,25 @@ var allServices = module.exports.allServices = [
   {
     name: 'instructables',
     baseUrl: 'http://www.instructables.com/',
+    prefix: 'id/',
     projectPath: {
       skip: 0,
-      take: 2
+      take: 1
     }
   },
   {
     name: 'pinshape',
     baseUrl: 'http://www.pinshape.com/',
+    prefix: 'items/',
     projectPath: {
       skip: 0,
-      take: 2
+      take: 1
     }
   },
   {
     name: 'sourceforge',
     baseUrl: 'http://www.sourceforge.com/',
+    prefix: 'projects/',
     projectPath: {
       skip: 0,
       take: 1
@@ -39,6 +43,7 @@ var allServices = module.exports.allServices = [
   {
     name: 'thingiverse',
     baseUrl: 'http://www.thingiverse.com/',
+    prefix: '',
     projectPath: {
       skip: 0,
       take: 1
@@ -54,9 +59,10 @@ var getProjectUrl = function(service, path) {
     .path
     .split('/')
     .slice(service.projectPath.skip+1, service.projectPath.take+1)
+    .map(encodeURIComponent)
     .join('/');
 
-  return url.resolve(service.baseUrl, pathname);
+  return url.resolve(service.baseUrl, service.prefix + pathname);
 };
 
 var createServiceRouter = function(service) {
