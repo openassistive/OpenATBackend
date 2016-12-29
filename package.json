@@ -16,6 +16,7 @@
     "hubfs.js": "^1.0.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.15.2",
+    "octonode": "^0.7.7",
     "request": "latest",
     "scraperjs": "^1.2.0",
     "sharp": "^0.16.2",
