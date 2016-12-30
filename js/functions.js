@@ -145,21 +145,22 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
       var imaget = sharp(path)
          .resize(250, 250)
          .png()
-         .toFile('download_image/' +filename+'-thumb.png', function(err) {
+         .toFile('./tmp/download_image/' +filename+'-thumb.png', function(err) {
             });
 
       var imagel = sharp(path)
          .resize(500, 500)
          .png()
-         .toFile('download_image/' +filename+'.png', function(err) {
+         .toFile('./tmp/download_image/' +filename+'.png', function(err) {
             });
       });
    });
    //Now write to Github - NB - NOT ASYNC. QUICK FIX
-   if (fs.existsSync('download_image/' +filename+'-thumb.png')) {
-      exports.writeFileToGithub('download_image/' +filename+'-thumb.png',locationInGit+filename+'-thumb.png');
+   if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
+      exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png',locationInGit+filename+'-thumb.png');
    }
-   if (fs.existsSync('download_image/' +filename+'.png')) {
-      exports.writeFileToGithub('download_image/' +filename+'.png',locationInGit+filename+'.png');
+
+   if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
+      exports.writeFileToGithub('./tmp/download_image/' +filename+'.png',locationInGit+filename+'.png');
    }
 };
