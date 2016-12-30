@@ -74,7 +74,6 @@ exports.handler = function(req, res, next) {
     })
     .then(function(result) {
       req.result = result;
-      return next();
       return next(req, res);
     })
     .catch(function(err) {
