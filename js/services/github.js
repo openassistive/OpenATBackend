@@ -28,8 +28,8 @@ var fromApi = function(repoPath) {
         project_url: body.html_url,
         description: body.description,
         main_description: body.description,
-        image: 'images/full/' + body.owner.login.replace(/\s/g, '_'),
-        thumb: 'images/thumb/' + body.owner.login.replace(/\s/g, '_'),
+        image: 'images/full/' + body.name,
+        thumb: 'images/thumb/' + body.name,
         original_url: body.html_url
       };
 
