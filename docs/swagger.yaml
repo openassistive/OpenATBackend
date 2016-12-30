@@ -17,7 +17,7 @@ info:
 host: "api.openassistive.org"
 basePath: "/v1/"
 schemes:
- - https
+ - http
 #host: "api.openassistive.org"
 #basePath: "/v1/"
 #schemes:
