@@ -27,17 +27,17 @@ exports.genShortTitle = function(strLongTitle) {
    return short_title;
 };
 
-/* 
+/*
    writes file to github
 */
 exports.writeFileToGithub = function(fileToSend,locationInGit) {
    var gh = Hubfs(GHOptions)
-   // token auth 
+   // token auth
    /*
    console.log(fileToSend)
    return null;
    */
-   
+
    fs.readFile(fileToSend, function (err,data) {
      if (err) {
        return console.log(err);
@@ -50,17 +50,13 @@ exports.writeFileToGithub = function(fileToSend,locationInGit) {
    });
 }
 
-/* 
+/*
    writes data to github
 */
-exports.writeDataToGithub = function(dataToSend,locationInGit) {
-   var gh = Hubfs(GHOptions)
-   // token auth 
-   gh.writeFile(locationInGit, dataToSend, function (err) {
-   if (err) throw err
-   //console.log('It\'s saved!')
-   return true;
-   });
+exports.writeDataToGithub = function(dataToSend, locationInGit, callback) {
+  var gh = Hubfs(GHOptions);
+   // token auth
+   gh.writeFile(locationInGit, dataToSend, callback);
 }
 
 
@@ -124,14 +120,14 @@ exports.SaveImages = function(image_url,filename) {
                  .png()
                  .toFile(filename+'-thumb.png', function(err) {
                  });
-   
+
                 var imagel = sharp(path)
                  .resize(500, 500)
                  .png()
                  .toFile(filename+'.png', function(err) {
-                 });  
-                 
-              });      
+                 });
+
+              });
    });
 };
 exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
@@ -157,16 +153,14 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
          .png()
          .toFile('./tmp/download_image/' +filename+'.png', function(err) {
             });
-      });      
+      });
    });
    //Now write to Github - NB - NOT ASYNC. QUICK FIX
    if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
       exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png',locationInGit+filename+'-thumb.png');
    }
+
    if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
-      exports.writeFileToGithub('./tmp/download_image/' +filename+'.png',locationInGit+filename+'.png');   
+      exports.writeFileToGithub('./tmp/download_image/' +filename+'.png',locationInGit+filename+'.png');
    }
 };
-
-
-

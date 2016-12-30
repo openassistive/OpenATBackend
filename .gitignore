@@ -21,3 +21,4 @@ download_image
 setup.sh
 build
 scripts
+yarn.lock
