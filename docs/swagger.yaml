@@ -51,9 +51,15 @@ paths:
         - "pinshape"
         - "sourceforge"
         - "thingiverse"
-      - name: "path"
+      - name: "id"
         in: "query"
-        description: "The path of the project page in the selected service."
+        description: |-
+          The identification of the project page in the selected service.
+          * github: username/projectname
+          * instructables: identification
+          * pinshape: identification
+          * sourceforge: projectname
+          * thingiverse: thing:id
         required: true
         type: "string"
         example: "/lemol/coj"

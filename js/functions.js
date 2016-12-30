@@ -53,14 +53,10 @@ exports.writeFileToGithub = function(fileToSend,locationInGit) {
 /*
    writes data to github
 */
-exports.writeDataToGithub = function(dataToSend,locationInGit) {
-   var gh = Hubfs(GHOptions)
+exports.writeDataToGithub = function(dataToSend, locationInGit, callback) {
+  var gh = Hubfs(GHOptions);
    // token auth
-   gh.writeFile(locationInGit, dataToSend, function (err) {
-   if (err) throw err
-   //console.log('It\'s saved!')
-   return true;
-   });
+   gh.writeFile(locationInGit, dataToSend, callback);
 }
 
 

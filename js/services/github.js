@@ -56,23 +56,23 @@ var scrape = function(url) {
         || $('h3:contains("License")').first().next('p').text();
 
       if ($('span.num.text-emphasized').first().text().trim() == '0') {
-          var data = $('div.mt-2 a').first();
-          result.download_url = data[0]['attribs']['href'];
+        var data = $('div.mt-2 a').first();
+        result.download_url = data[0]['attribs']['href'];
       }
 
       var data_img = $('article.markdown-body.entry-content img').first();
       if (data_img == undefined || data_img == '') {
-          data_img = $('img').first();
-          result.image_donwload = data_img.attr("src");
+        data_img = $('img').first();
+        result.image_donwload = data_img.attr("src");
       } else {
-          result.image_donwload = data_img[0]['attribs']['src'];
+        result.image_donwload = data_img[0]['attribs']['src'];
       }
 
       return result;
     });
 };
 
-exports.handler = function(req, res) {
+exports.handler = function(req, res, next) {
   var url = req.projectUrl;
   var repoPath = req.repoPath;
 
@@ -80,8 +80,8 @@ exports.handler = function(req, res) {
     fromApi(repoPath),
     scrape(url)
   ]).then(function(result) {
-    var data = Object.assign({}, result[0], result[1]);
-    return res.json(data);
+    req.result = Object.assign({}, result[0], result[1]);
+    return next(req, res);
   }).catch(function(err) {
     if(err.status) {
       return res

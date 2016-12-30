@@ -4,7 +4,7 @@ var moment = require('moment');
 var scraperjs = require('scraperjs');
 var toMarkdown = require('to-markdown');
 
-exports.handler = function(req, res) {
+exports.handler = function(req, res, next) {
   var url = req.projectUrl;
 
   scraperjs.StaticScraper.create(url)
@@ -73,7 +73,9 @@ exports.handler = function(req, res) {
       return result;
     })
     .then(function(result) {
-      return res.json(result);
+      req.result = result;
+      return next();
+      return next(req, res);
     })
     .catch(function(err) {
       if(err.status) {

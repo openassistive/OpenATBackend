@@ -2,6 +2,7 @@
 
 var url = require('url');
 var Router = require('express').Router;
+var contentCreator = require('../functions');
 
 var allServices = module.exports.allServices = [
   {
@@ -65,14 +66,27 @@ var getProjectUrl = function(service, path) {
   return url.resolve(service.baseUrl, service.prefix + pathname);
 };
 
+var returnHandler = function(req, res) {
+  if(req.accepts('text/json') || req.accepts('application/json')) {
+    return res.json(req.result);
+  }
+
+  if(req.accepts('text/markdown') || req.accepts('application/markdown')) {
+    res.set('Content-Type', 'text/markdown');
+    return res.send(new Buffer(contentCreator.generateMDFile(req.result)));
+  }
+
+  res.json(req.result);
+};
+
 var createServiceRouter = function(service) {
   var router = new Router();
   var handler = require('./' + service.name).handler;
 
-  router.get('/', function(req, res, next) {
-    req.projectUrl = getProjectUrl(service, req.query.path);
+  router.get('/', function(req, res) {
+    req.projectUrl = getProjectUrl(service, req.query.id);
     req.repoPath = url.parse(req.projectUrl).pathname;
-    handler(req, res, next);
+    handler(req, res, returnHandler);
   });
 
   return router;

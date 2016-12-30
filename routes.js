@@ -14,7 +14,7 @@ var setupApi = function(app, cors) {
     api.use('/' + service.name + '/project', service.router);
   });
   app.use('/v1/service', cors(), api);
-  api.use('/v1/project/save', require('./js/savejson'));
+  app.use('/v1/project/save', require('./js/savejson'));
 };
 
 var setupDocs = function(app) {
@@ -28,8 +28,8 @@ module.exports = function(app, cors) {
   var whitelist = ['http://example1.com', 'http://example2.com'];
   var corsOptions = {
     origin: function(origin, callback){
-       var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
-       callback(originIsWhitelisted ? null : 'Bad Request', originIsWhitelisted);
+      var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+      callback(originIsWhitelisted ? null : 'Bad Request', originIsWhitelisted);
     }
   };
 
