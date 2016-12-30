@@ -128,7 +128,7 @@ definitions:
       authors: "mlundalv, stuartaw, walsh_jc"
       license: "GNU General Public License version 3.0 (GPLv3)"
       datemod: "2016-10-22 00:00"
-      download_url: "http://www.sourceforge.net//projects/sawat/files/latest/download"
+      download_url: "http://www.sourceforge.net/projects/sawat/files/latest/download"
       project_url: "http://www.oatsoft.org/Software/SpecialAccessToWindows"
       description: |-
         SAW - Special Access to Windows download. SAW - Special Access to Windows
