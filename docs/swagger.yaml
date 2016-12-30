@@ -14,7 +14,7 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
   x-logo:
     url: ""
-host: "openatbackend-test.herokuapp.com"
+host: "api.openassistive.org"
 basePath: "/v1/"
 schemes:
  - https
