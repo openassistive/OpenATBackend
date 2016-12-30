@@ -62,7 +62,6 @@ paths:
           * thingiverse: thing:id
         required: true
         type: "string"
-        example: "/lemol/coj"
       responses:
         200:
           description: "Successful operation"
