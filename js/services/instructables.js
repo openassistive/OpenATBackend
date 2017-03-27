@@ -19,6 +19,7 @@ exports.handler = function(req, res, next) {
         download_url: "",
         project_url: "",
         description: "",
+        tags: ["hardware","un-tagged"],
         main_description: "",
         image: "",
         thumb: "",

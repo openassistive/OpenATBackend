@@ -26,6 +26,7 @@ var fromApi = function(repoPath) {
         datemod: body.updated_at,
         download_url: body.html_url + '/releases',
         project_url: body.html_url,
+        tags: ["software","un-tagged"],
         description: body.description,
         main_description: body.description,
         image: 'images/full/' + body.name,

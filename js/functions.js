@@ -6,6 +6,7 @@ var http = require("http");
 var sharp = require('sharp');
 var Hubfs = require('hubfs.js')
 var toTitleCase = require('titlecase')
+var yamljs = require("yamljs")
 
 var GHOptions = {
   owner: 'openassistive',
@@ -65,20 +66,22 @@ exports.writeDataToGithub = function(dataToSend, locationInGit, callback) {
    }
 }
 
-exports.generateMDFile = function(json) {
-    var content = '---\n';
-    //var obj = JSON.parse(json);
-    var obj = json;
-    var temp = "";
-    for (var index in obj) {
-        if (index != 'main_description') {
-            if (obj[index].length>1 || obj[index]!=''){
-               temp += (index + ': "' + obj[index] + '" \n');
-            }
-        }
-    }
-    content += temp + '\n' + '---\n';
+exports.cloneObj = function(obj) {
+       if (null == obj || "object" != typeof obj) return obj;
+       var copy = obj.constructor();
+       for (var attr in obj) {
+           if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+       }
+       return copy;
+   }
 
+exports.generateMDFile = function(json) {
+    var obj = exports.cloneObj(json);
+    // messy way of doing things but couldnt figure out a better way
+    delete obj['main_description'];
+    var content = '---\n';    
+    content += yamljs.stringify(obj, 4);
+    content += '---\n';
     if (json.main_description != undefined && json.main_description != "") {
         content += json.main_description;
     }
