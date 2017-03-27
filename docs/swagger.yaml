@@ -33,7 +33,6 @@ paths:
       operationId: "scrapeProject"
       produces:
       - "application/json"
-      - "text/markdown"
       parameters:
       - name: "service"
         in: "path"
