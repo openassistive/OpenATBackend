@@ -31,29 +31,39 @@ exports.genShortTitle = function(strLongTitle) {
    writes file to github
 */
 exports.writeFileToGithub = function(fileToSend,locationInGit) {
-   var gh = Hubfs(GHOptions)
-   fs.readFile(fileToSend, function (err,data) {
-     if (err) {
-       return console.log(err);
-     }
-     gh.writeFile(locationInGit, data, function (err) {
-     if (err) throw err
-     //console.log('It\'s saved!')
-     return true;
-     })
-   });
+   if (process.env.NODE_ENV=='development'){
+      console.log("Sending to:\n"+locationInGit);
+      console.log("Sending data:\n"+fileToSend);
+      return true;
+   } else {
+      var gh = Hubfs(GHOptions)
+      fs.readFile(fileToSend, function (err,data) {
+        if (err) {
+          return console.log(err);
+        }
+        gh.writeFile(locationInGit, data, function (err) {
+        if (err) throw err
+        //console.log('It\'s saved!')
+        return true;
+        })
+      });
+   }
 }
 
 /*
    writes data to github
 */
 exports.writeDataToGithub = function(dataToSend, locationInGit, callback) {
-  var gh = Hubfs(GHOptions);
-   // token auth
-   gh.writeFile(locationInGit, dataToSend, callback);
+   if (process.env.NODE_ENV=='development'){
+      console.log("Sending to:\n"+locationInGit);
+      console.log("Sending data:\n"+dataToSend);
+      return true;
+   } else {
+      var gh = Hubfs(GHOptions);
+      // token auth
+      gh.writeFile(locationInGit, dataToSend, callback);
+   }
 }
-
-
 
 exports.generateMDFile = function(json) {
     var content = '---\n';
@@ -63,7 +73,7 @@ exports.generateMDFile = function(json) {
     for (var index in obj) {
         if (index != 'main_description') {
             if (obj[index].length>1 || obj[index]!=''){
-               temp += (index + ':' + obj[index] + '\n');
+               temp += (index + ': "' + obj[index] + '" \n');
             }
         }
     }
