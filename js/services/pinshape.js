@@ -70,6 +70,13 @@ exports.handler = function(req, res, next) {
           result.thumb = "images/" + result.short_title + "-thumb.png";
       }
 
+      for (var index in result) {
+         if (!result[index] || /^\s*$/.test(result[index])) {
+           delete result[index];
+         }
+      }
+
+
       return result;
     })
     .then(function(result) {

@@ -63,9 +63,15 @@ var scrape = function(url) {
       var data_img = $('article.markdown-body.entry-content img').first();
       if (data_img == undefined || data_img == '') {
         data_img = $('img').first();
-        result.image_donwload = data_img.attr("src");
+        result.image_download = data_img.attr("src");
       } else {
-        result.image_donwload = data_img[0]['attribs']['src'];
+        result.image_download = data_img[0]['attribs']['src'];
+      }
+
+      for (var index in result) {
+         if (!result[index] || /^\s*$/.test(result[index])) {
+           delete result[index];
+         }
       }
 
       return result;

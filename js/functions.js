@@ -32,12 +32,6 @@ exports.genShortTitle = function(strLongTitle) {
 */
 exports.writeFileToGithub = function(fileToSend,locationInGit) {
    var gh = Hubfs(GHOptions)
-   // token auth
-   /*
-   console.log(fileToSend)
-   return null;
-   */
-
    fs.readFile(fileToSend, function (err,data) {
      if (err) {
        return console.log(err);
@@ -68,40 +62,18 @@ exports.generateMDFile = function(json) {
     var temp = "";
     for (var index in obj) {
         if (index != 'main_description') {
-            temp += (index + ':' + obj[index] + '\n');
+            if (obj[index].length>1 || obj[index]!=''){
+               temp += (index + ':' + obj[index] + '\n');
+            }
         }
-
     }
     content += temp + '\n' + '---\n';
 
     if (json.main_description != undefined && json.main_description != "") {
         content += json.main_description;
     }
-
     return content;
 };
-
-
-exports.createMDFile = function(json) {
-    var content = '---\n';
-    //var obj = JSON.parse(json);
-    var obj = json;
-    var temp = "";
-    for (var index in obj) {
-        if (index != 'main_description') {
-            temp += (index + ':' + obj[index] + '\n');
-        }
-
-    }
-    content += temp + '\n' + '---\n';
-
-    if (json.main_description != undefined && json.main_description != "") {
-        content += json.main_description;
-    }
-
-    return content;
-};
-
 
 exports.download = function(uri, filename, callback) {
     request.head(uri, function(err, res, body) {
@@ -133,12 +105,6 @@ exports.SaveImages = function(image_url,filename) {
 exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
    var sharp = require('sharp');
    var tmp = require('tmp');
-   /*
-   console.log("image_url:"+image_url);
-   console.log("filename:"+filename);
-   console.log("locationInGit:"+locationInGit);
-   return null;
-   */
    tmp.file({ mode: parseInt('0644',8), prefix: 'openatimg-', postfix: '.jpg' },function _tempFileCreated(err, path, fd) {
      if (err) throw err;
      exports.download(image_url,path, function() {

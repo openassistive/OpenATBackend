@@ -80,6 +80,12 @@ exports.handler = function(req, res, next) {
         result.main_description = toMarkdown(data.html());
       });
 
+      for (var index in result) {
+         if (!result[index] || /^\s*$/.test(result[index])) {
+           delete result[index];
+         }
+      }
+
       return result;
     })
     .then(function(result) {
