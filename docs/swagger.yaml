@@ -15,14 +15,11 @@ info:
   x-logo:
     url: ""
 host: "api.openassistive.org"
+#host: "localhost:5000"
 basePath: "/v1/"
 schemes:
  - http
  - https
-#host: "localhost:5000"
-#basePath: "/v1/"
-#schemes:
-#- http
 tags:
 - name: "scraper service"
   description: "Get a project information"
