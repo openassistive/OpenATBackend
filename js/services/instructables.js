@@ -19,7 +19,8 @@ exports.handler = function(req, res, next) {
         download_url: "",
         project_url: "",
         description: "",
-        tags: ["hardware","un-tagged"],
+        tags: ["un-tagged"],
+        categories: ["hardware"],
         main_description: "",
         image: "",
         thumb: "",
@@ -42,8 +43,12 @@ exports.handler = function(req, res, next) {
       result.License = $('section#project-categories-and-license section.content a').text().trim();
 
       // Oct. 5, 2015, 8:12 a.m.
-      result.datemod = moment($('meta[itemprop=datePublished]').attr('content'),'MMM. D, YYYY, h:mm a').format("YYYY-MM-DD HH:mm");
-
+      // 2016-05-12 16:40:03.0
+      console.log($('meta[itemprop=dateModified]').attr('content'));
+      // this is neat. it gets the schema
+      var obj = $("script").attr("type","application/ld+json");
+      console.log(obj.text);
+      result.datemod = moment($('meta[itemprop=dateModified]').attr('content'),'YYYY-MM-DD HH:mm:ss.S').format("YYYY-MM-DD HH:mm");
       result.authors = "";
       $('span.author a[rel="author"]').each(function(index, item) {
         if (index > 0) {

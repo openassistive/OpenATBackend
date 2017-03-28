@@ -26,7 +26,8 @@ var fromApi = function(repoPath) {
         datemod: body.updated_at,
         download_url: body.html_url + '/releases',
         project_url: body.html_url,
-        tags: ["software","un-tagged"],
+        tags: ["un-tagged"],
+        categories: ["software"],
         description: body.description,
         main_description: body.description,
         image: 'images/full/' + body.name,
@@ -69,6 +70,7 @@ var scrape = function(url) {
         result.image_download = data_img[0]['attribs']['src'];
       }
 
+      // delete empty elements
       for (var index in result) {
          if (!result[index] || /^\s*$/.test(result[index])) {
            delete result[index];
