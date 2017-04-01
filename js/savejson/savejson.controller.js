@@ -37,7 +37,7 @@ exports.saveJSON = function(req, res) {
    // need to fix tags - maybe in the generateMDFile function
    if (json.image_download){
       console.log('about to save the images..');
-      contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'images/');
+      contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'static/files/images/');
    }
    
    contentCreator.writeDataToGithub(contentCreator.generateMDFile(json), 'content/item/'+json.short_title + '.md', function (err) {
