@@ -12,17 +12,21 @@
     "body-parser": "^1.15.2",
     "cheerio": "latest",
     "cors": "^2.8.1",
+    "datejs": "^1.0.0-rc3",
     "express": "latest",
     "hubfs.js": "^1.0.0",
+    "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
     "moment": "^2.15.2",
     "octonode": "^0.7.7",
     "request": "latest",
+    "sanitize-html": "^1.14.1",
     "scraperjs": "^1.2.0",
     "sharp": "^0.16.2",
     "titlecase": "^1.1.2",
     "tmp": "0.0.30",
     "to-markdown": "^3.0.3",
+    "validate": "^3.0.1",
     "yamljs": "^0.2.8"
   }
 }

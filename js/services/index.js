@@ -66,17 +66,43 @@ var getProjectUrl = function(service, path) {
   return url.resolve(service.baseUrl, service.prefix + pathname);
 };
 
+function baseParamsMiddleWare(req, resp) {
+  // insert base parameters in here
+  // [ exists (ref #8) ]
+  if(!req.result) // unexpected call
+    return Promise.resolve();
+  var promises = []; 
+  if(req.result.short_title) {
+    promises.push(
+      contentCreator.readItemFromGithub(req.result.short_title)
+        .then((resp) => {
+          req.result.exists = true;
+          // simple relative url
+          req.result.current_url = "/item/" + req.result.short_title;
+        })
+        .catch((err) => {
+          req.result.exists = false;
+        });
+    );
+  }
+  return Promise.all(promises);
+}
+
 var returnHandler = function(req, res) {
-  if(req.accepts('text/json') || req.accepts('application/json')) {
-    return res.json(req.result);
-  }
 
-  if(req.accepts('text/markdown') || req.accepts('application/markdown')) {
-    res.set('Content-Type', 'text/markdown');
-    return res.send(new Buffer(contentCreator.generateMDFile(req.result)));
-  }
+  baseParamsMiddleWare(req, res)
+    .then(() => {
+      if(req.accepts('text/json') || req.accepts('application/json')) {
+        return res.json(req.result);
+      }
 
-  res.json(req.result);
+      if(req.accepts('text/markdown') || req.accepts('application/markdown')) {
+        res.set('Content-Type', 'text/markdown');
+        return res.send(new Buffer(contentCreator.generateMDFile(req.result)));
+      }
+
+      res.json(req.result);
+    });
 };
 
 var createServiceRouter = function(service) {

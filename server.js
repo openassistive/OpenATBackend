@@ -3,7 +3,10 @@ var express = require('express')
   , app = express()
   , bodyParser = require('body-parser')
   , path = require('path');
-  
+
+// include datejs
+require('datejs')
+
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -22,12 +25,10 @@ var mkdirp = require('mkdirp');
 
 mkdirp('./tmp/download_image', function (err) {
     if (err) console.error(err)
-    else console.log('Could not make download_image dir')
 });
 
 mkdirp('./tmp/output', function (err) {
     if (err) console.error(err)
-    else console.log('Could not make output dir')
 });
 
 

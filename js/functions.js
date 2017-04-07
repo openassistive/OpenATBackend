@@ -8,6 +8,8 @@ var Hubfs = require('hubfs.js')
 var toTitleCase = require('titlecase')
 var yamljs = require("yamljs")
 
+const util = require('./util')
+
 var GHOptions = {
   owner: 'openassistive',
   repo: 'OpenATFrontEnd',
@@ -27,6 +29,25 @@ exports.genShortTitle = function(strLongTitle) {
    short_title = short_title.replace(rexp, '');
    return short_title;
 };
+
+exports.readItemFromGithub = function(fn) {
+  var gh = Hubfs(GHOptions)
+  // item known to have yaml fm
+  // and content in markdown format
+  return new Promise((resolve, reject) => {
+    gh.readFile(fn, (err, data) => {
+      if(err) {
+        reject(err);
+      } else {
+        try {
+          resolve(util.parseItem(data));
+        } catch(err) {
+          reject(err);
+        }
+      }
+    });
+  });
+}
 
 /*
    writes file to github
