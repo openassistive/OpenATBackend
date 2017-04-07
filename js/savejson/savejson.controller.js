@@ -45,8 +45,8 @@ const saveValidator = schema(Object.assign(
       })
   ),
   _.fromPairs(
-    [ "download_url", "project_url", "original_url",
-      { n: "image_download", r: false } ]
+    [ "project_url", "original_url",
+      { n: "download_url", r: false }, { n: "image_download", r: false } ]
       .map((n) => { // required url
         var required = true;
         if(typeof n == 'object') {

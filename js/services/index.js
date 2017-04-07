@@ -66,12 +66,15 @@ var getProjectUrl = function(service, path) {
   return url.resolve(service.baseUrl, service.prefix + pathname);
 };
 
-function baseParamsMiddleWare(req, resp) {
+function baseParamsMiddleWare(service, req, resp) {
   // insert base parameters in here
   // [ exists (ref #8) ]
   if(!req.result) // unexpected call
     return Promise.resolve();
-  var promises = []; 
+  var promises = [];
+
+  req.result.service_name = service.name;
+  
   if(req.result.short_title) {
     promises.push(
       contentCreator.readItemFromGithub(req.result.short_title)
@@ -89,8 +92,8 @@ function baseParamsMiddleWare(req, resp) {
 }
 
 var returnHandler = function(req, res) {
-
-  baseParamsMiddleWare(req, res)
+  var service = this;
+  baseParamsMiddleWare(service, req, res)
     .then(() => {
       if(req.accepts('text/json') || req.accepts('application/json')) {
         return res.json(req.result);
@@ -112,7 +115,7 @@ var createServiceRouter = function(service) {
   router.get('/', function(req, res) {
     req.projectUrl = getProjectUrl(service, req.query.id);
     req.repoPath = url.parse(req.projectUrl).pathname;
-    handler(req, res, returnHandler);
+    handler(req, res, returnHandler.bind(service));
   });
 
   return router;
