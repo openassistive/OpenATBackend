@@ -1,8 +1,8 @@
 'use strict';
 var contentCreator = require('../functions');
-var moment = require('moment');
 var scraperjs = require('scraperjs');
 var github = require('octonode');
+const util = require('../util')
 
 var fromApi = function(repoPath) {
   var client = github.client();
@@ -18,12 +18,17 @@ var fromApi = function(repoPath) {
       if (err) {
         return reject(err);
       }
+      
+      var datemod = Date.parse(body.updated_at);
+      if(!datemod) // could not parse datemod
+        datemod = new Date();
+      datemod = util.dateISOString(datemod);
 
       var result = {
         title: body.name,
         short_title: body.name,
         authors: body.owner.login,
-        datemod: body.updated_at,
+        datemod: datemod,
         download_url: body.html_url + '/releases',
         project_url: body.html_url,
         tags: ["un-tagged"],

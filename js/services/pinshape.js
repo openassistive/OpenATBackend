@@ -1,8 +1,8 @@
 'use strict';
 var contentCreator = require('../functions');
-var moment = require('moment');
 var scraperjs = require('scraperjs');
 var toMarkdown = require('to-markdown');
+const util = require('../util')
 
 exports.handler = function(req, res, next) {
   var url = req.projectUrl;
@@ -46,8 +46,11 @@ exports.handler = function(req, res, next) {
           var data = $(this);
           result.authors = data.text().trim();
         })
-
-        result.datemod =  moment(pinshape_JSON.updated_at).format('YYYY-MM-DD HH:mm');
+        
+        var datemod = Date.parse(pinshape_JSON.updated_at);
+        if(!datemod) // could not parse datemod
+          datemod = new Date();
+        result.datemod = util.dateISOString(datemod);
         result.project_url =  url;
         result.description = toMarkdown(pinshape_JSON.description.substring(7));
         result.original_url =  url;

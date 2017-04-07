@@ -1,8 +1,8 @@
 'use strict';
 var contentCreator = require('../functions');
-var moment = require('moment');
 var scraperjs = require('scraperjs');
 var toMarkdown = require('to-markdown');
+const util = require('../util')
 
 exports.handler = function(req, res, next) {
   var url = req.projectUrl;
@@ -44,7 +44,10 @@ exports.handler = function(req, res, next) {
 
       result.short_title = contentCreator.genShortTitle(result.title);
       result.License = $('div.thing-license').first().attr('title');
-      result.datemod = moment($('div.thing-header-data time').attr('datetime'),'YYYY-MM-DD HH:mm:ss').format("YYYY-MM-DD HH:mm");
+      var datemod = Date.parse($('div.thing-header-data time').attr('datetime'));
+      if(!datemod) // could not parse datemod
+        datemod = new Date();
+      result.datemod = util.dateISOString(datemod);
 
       result.authors = "";
 

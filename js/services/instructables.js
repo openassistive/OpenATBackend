@@ -1,8 +1,8 @@
 'use strict';
 var contentCreator = require('../functions');
-var moment = require('moment');
 var scraperjs = require('scraperjs');
 var toMarkdown = require('to-markdown');
+const util = require('../util')
 
 exports.handler = function(req, res, next) {
   var url = req.projectUrl;
@@ -48,7 +48,10 @@ exports.handler = function(req, res, next) {
       // this is neat. it gets the schema
       var obj = $("script").attr("type","application/ld+json");
       console.log(obj.text);
-      result.datemod = moment($('meta[itemprop=dateModified]').attr('content'),'YYYY-MM-DD HH:mm:ss.S').format("YYYY-MM-DD HH:mm");
+      var datemod = Date.parse($('meta[itemprop=dateModified]').attr('content'));
+      if(!datemod) // could not parse datemod
+        datemod = new Date();
+      result.datemod = util.dateISOString(datemod);
       result.authors = "";
       $('span.author a[rel="author"]').each(function(index, item) {
         if (index > 0) {
