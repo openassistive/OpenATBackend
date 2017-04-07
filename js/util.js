@@ -1,6 +1,8 @@
+const yamljs = require("yamljs")
 
 function prefixFixedString(str, fill, num) {
-  return fill.repeat(Math.floor(num - str.length / fill.length)) + str;
+  str = str+'';
+  return fill.repeat(Math.floor((num - str.length) / fill.length)) + str;
 }
 
 module.exports = {

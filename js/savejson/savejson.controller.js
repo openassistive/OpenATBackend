@@ -97,7 +97,7 @@ exports.saveJSON = function(req, res) {
    contentCreator.readItemFromGithub(itemFn)
      .then((resp) => {
        for(let prop of readonlyProps)
-         json[prop] = resp[prop];
+         json[prop] = resp.fm[prop];
        save();
      })
      .catch((err) => {

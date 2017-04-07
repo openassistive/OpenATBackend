@@ -40,7 +40,7 @@ exports.readItemFromGithub = function(fn) {
         reject(err);
       } else {
         try {
-          resolve(util.parseItem(data));
+          resolve(util.parseItem(data.toString('utf8')));
         } catch(err) {
           reject(err);
         }
