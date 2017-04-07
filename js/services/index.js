@@ -85,7 +85,7 @@ function baseParamsMiddleWare(service, req, resp) {
         })
         .catch((err) => {
           req.result.exists = false;
-        });
+        })
     );
   }
   return Promise.all(promises);
