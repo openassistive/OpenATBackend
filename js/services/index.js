@@ -76,8 +76,9 @@ function baseParamsMiddleWare(service, req, resp) {
   req.result.service_name = service.name;
   
   if(req.result.short_title) {
+    let itemFn = 'content/item/' + req.result.short_title + '.md';
     promises.push(
-      contentCreator.readItemFromGithub(req.result.short_title)
+      contentCreator.readItemFromGithub(itemFn)
         .then((resp) => {
           req.result.exists = true;
           // simple relative url
