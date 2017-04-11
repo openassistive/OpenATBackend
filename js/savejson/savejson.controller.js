@@ -102,12 +102,18 @@ exports.saveJSON = function(req, res) {
      })
      .catch((err) => {
        console.error(err); // log for debugging
-       // current time
-       json.date = util.dateISOString(new Date());
        save();
      });
 
-   function save() {
+  function save() {
+
+     // set initial value on null
+     if(!json.date) // current time
+       json.date = util.dateISOString(new Date());
+
+     if(json.dryrun) {
+       return res.json({ "savedata": json });
+     }
      // we need to write to GitHub - not just download
      // need to fix tags - maybe in the generateMDFile function
      if (json.image_download){
