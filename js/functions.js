@@ -163,6 +163,7 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
           new Promise((resolve, reject) => {
             sharp(path)
               .resize(150)
+              .min() // ensure that image width is atleast 150px or the size of image
               .png()
               .toBuffer(function (err, outputBuffer, info) {
                 // info.width and info.height contain the dimensions of the resized image
@@ -178,6 +179,7 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
           new Promise((resolve, reject) => {
             sharp(path)
               .resize(500)
+              .max() // ensure that image width is atmost 500px or the size of image
               .png()
               .toBuffer(function (err, outputBuffer, info) {
                 // info.width and info.height contain the dimensions of the resized image
