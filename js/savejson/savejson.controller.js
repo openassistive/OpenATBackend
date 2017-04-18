@@ -56,12 +56,13 @@ const saveValidator = schema(Object.assign(
           },
           message: n + ' should be a valid url'
         } ];
-      }),
+      })
+  ),
   _.fromPairs(
     [ 'tags', 'categories' ]
       .map((n) => { // required string
         // main_description should get sanitized after this validation
-        return [ n,     {
+        return [ n, {
           use: [ function(value) {
             if(value == null)
               return true;
@@ -71,7 +72,8 @@ const saveValidator = schema(Object.assign(
           required: n + ' is required'
         } ];
       })
-  ))));
+  )
+));
 const readonlyProps = ['date']
 
 exports.saveJSON = function(req, res) {
