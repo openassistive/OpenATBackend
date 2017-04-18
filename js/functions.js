@@ -82,7 +82,7 @@ exports.writeFileToGithub = function(fileToSend,locationInGit) {
 /*
    writes data to github
 */
-exports.writeDataToGithub = function(dataToSend, locationInGit, callback) {
+exports.writeDataToGithub = function(dataToSend, locationInGit) {
   return new Promise((resolve, reject) => {
     if (process.env.NODE_ENV=='development'){
       console.log("Sending to:\n"+locationInGit);
@@ -164,37 +164,31 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
             sharp(path)
               .resize(150)
               .png()
-              .toFile('./tmp/download_image/' +filename+'-thumb.png', function(err) {
+              .toBuffer(function (err, outputBuffer, info) {
+                // info.width and info.height contain the dimensions of the resized image
                 if(err)
                   reject(err);
-                else { 
-                  if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
-                    dest_thumb = 'images/'+filename+'-thumb.png';
-                    exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png', locationInGit+filename+'-thumb.png')
-                      .then(resolve, reject);
-                  } else {
-                    resolve();
-                  }
-                }
+                else {
+                  dest_thumb = 'images/'+filename+'-thumb.png';
+                  exports.writeDataToGithub(outputBuffer, locationInGit+filename+'-thumb.png')
+                    .then(resolve, reject);
+                }      
               });
           }),
           new Promise((resolve, reject) => {
             sharp(path)
               .resize(500)
               .png()
-              .toFile('./tmp/download_image/' +filename+'.png', function(err) {
+              .toBuffer(function (err, outputBuffer, info) {
+                // info.width and info.height contain the dimensions of the resized image
                 if(err)
                   reject(err);
                 else {
-                  if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
-                    dest_image = 'images/'+filename+'.png';
-                    exports.writeFileToGithub('./tmp/download_image/' +filename+'.png', locationInGit+filename+'.png')
-                      .then(resolve, reject);
-                  } else {
-                    resolve();
-                  }
-                }
-              })
+                  dest_image = 'images/'+filename+'.png';
+                  exports.writeDataToGithub(outputBuffer, locationInGit+filename+'.png')
+                    .then(resolve, reject);
+                }      
+              });
           })
         ]).then(() => {
           resolve({
