@@ -19,7 +19,7 @@
     "mkdirp": "^0.5.1",
     "moment": "^2.15.2",
     "octonode": "^0.7.7",
-    "request": "latest",
+    "request": "^2.81.0",
     "sanitize-html": "^1.14.1",
     "scraperjs": "^1.2.0",
     "sharp": "^0.16.2",

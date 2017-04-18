@@ -20,6 +20,11 @@ if (!process.env.GitHubOAuth){
    return null;
 }
 
+if (!process.env.RecaptchaSecret){
+   console.error('No RecaptchaSecret env var set! Now quitting');
+   return null;
+}
+
 // Init stuff - this will eventually get removed once we move to the whole github pulling and updating 
 var mkdirp = require('mkdirp');
 

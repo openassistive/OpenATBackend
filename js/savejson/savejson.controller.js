@@ -78,45 +78,72 @@ const readonlyProps = ['date', 'thumb', 'image'];
 
 exports.saveJSON = function(req, res) {
 
-   if (!req.body){
+  if (!req.body){
     console.log('no body');
     return res.sendStatus(400);
-   }
+  }
 
-   var _json = req.body,
-       json = _.assign({}, _json);
+  var _json = req.body,
+      json = _.assign({}, _json);
+
+  var recaptcha_resp = _json['g-recaptcha-response'];
+  if(!recaptcha_resp)
+    return res.json({ error: "No recaptcha response!" });
+  request.post("https://www.google.com/recaptcha/api/siteverify", {
+    form: {
+      secret: process.env.RecaptchaSecret,
+      response: recaptcha_resp,
+      remoteip: req.connection.remoteAddress
+    }
+  }, (err, resp, body) => {
+    try {
+      if(err)
+        throw err;
+      var respdata = JSON.parse(body);
+      if(!respdata)
+        throw new Error("Could not parse response");
+      if(respdata.success)
+        step1();
+      else
+        throw new Error("Invalid response");
+    } catch(err) {
+      res.json({ error: "Recaptcha error: " + (err?err.message||err:'undefined') });
+    }
+  })
   
-   var errors = saveValidator.validate(json)
+  function step1() {
+    var errors = saveValidator.validate(json)
 
-   if(errors.length > 0) {
-     return res.json({ error: errors[0].message });
-   }
+    if(errors.length > 0) {
+      return res.json({ error: errors[0].message });
+    }
 
-   // prevent abuse with html tags, <script injection>
-   json.main_description = sanitizeHtml(json.main_description)
+    // prevent abuse with html tags, <script injection>
+    json.main_description = sanitizeHtml(json.main_description)
 
-   // convert dates
-   json.datemod = util.dateISOString(Date.parse(json.datemod))
+    // convert dates
+    json.datemod = util.dateISOString(Date.parse(json.datemod))
+
+    let itemFn = 'content/item/'+json.short_title + '.md';
+
+    // assuming `date' is readonly, It's the save time if overwriting then
+    // get date from existing file
+    contentCreator.readItemFromGithub(itemFn)
+      .then((resp) => {
+        for(let prop of readonlyProps) {
+          if(resp.fm[prop])
+            json[prop] = resp.fm[prop];
+          else
+            delete json[prop];
+        }
+        save();
+      })
+      .catch((err) => {
+        console.error(err); // log for debugging
+        save();
+      });
+  }
   
-   let itemFn = 'content/item/'+json.short_title + '.md';
-  
-   // assuming `date' is readonly, It's the save time if overwriting then
-   // get date from existing file
-   contentCreator.readItemFromGithub(itemFn)
-     .then((resp) => {
-       for(let prop of readonlyProps) {
-         if(resp.fm[prop])
-           json[prop] = resp.fm[prop];
-         else
-           delete json[prop];
-       }
-       save();
-     })
-     .catch((err) => {
-       console.error(err); // log for debugging
-       save();
-     });
-
   function save() {
 
      // set initial value on null
@@ -131,6 +158,9 @@ exports.saveJSON = function(req, res) {
     // on save set as un-moderated (no matter what is the input)
     json.moderated = false;
     json.tags.push("un-moderated");
+
+    // set remoteip
+    json.relayed_by_ip = req.connection.remoteAddress;
 
     if(_json.dryrun) {
       return res.json({ "savedata": json });
