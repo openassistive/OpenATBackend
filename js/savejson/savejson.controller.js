@@ -78,7 +78,7 @@ exports.saveJSON = function(req, res) {
 
    var json = req.body;
   
-   var errors = saveValidator.validate(json)
+   var errors = saveValidator.validate(json, { strip: false })
 
    if(errors.length > 0) {
      return res.json({ error: errors[0].message });
@@ -120,8 +120,6 @@ exports.saveJSON = function(req, res) {
     json.moderated = false;
     json.tags.push("un-moderated");
 
-  res.json({ "json2": json })
-  return;   
      if(json.dryrun) {
        return res.json({ "savedata": json });
      }
