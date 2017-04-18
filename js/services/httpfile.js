@@ -12,7 +12,6 @@ exports.handler = function(req, res, next) {
 
       var result = {
         title: "",
-        type: "",
         authors: "",
         License: "",
         datemod: "",

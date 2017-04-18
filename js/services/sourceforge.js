@@ -12,7 +12,6 @@ exports.handler = function(req, res, next) {
 
       var result = {
         title: "",
-        type: "",
         authors: "",
         License: "",
         datemod: "",
@@ -20,7 +19,7 @@ exports.handler = function(req, res, next) {
         project_url: "",
         description: "",
         tags: ["un-tagged"],
-        categories: ["hardware"],
+        categories: ["software"],
         main_description: "",
         image: "",
         thumb: "",
@@ -28,7 +27,6 @@ exports.handler = function(req, res, next) {
         short_title: ""
       };
 
-      result.type = "software";
       result.project_url = $('a#homepage').attr("href");
       result.original_url = url;
 

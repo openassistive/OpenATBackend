@@ -12,7 +12,6 @@ exports.handler = function(req, res, next) {
 
       var result = {
         title: "",
-        type: "",
         authors: "",
         License: "",
         datemod: "",
@@ -28,7 +27,6 @@ exports.handler = function(req, res, next) {
         short_title: ""
       };
 
-      result.type = "hardware";
       result.project_url = url;
       result.original_url = url;
       result.title = $('title').text().trim() || 'About THING - Thingiverse';

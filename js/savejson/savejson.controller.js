@@ -22,19 +22,10 @@ const saveValidator = schema(Object.assign(
     license: {
       type: 'string',
       message: 'license should be a string'
-    },
-    tags: {
-      use: [ function(value) {
-        if(value == null)
-          return true;
-        return Array.isArray(value) &&
-          value.filter((s) => typeof s != 'string' || s.length==0).length == 0;
-      }, 'tags should be an array of non-empty string' ],
-      required: 'tags is required'
     }
   },
   _.fromPairs(
-    [ "title", "short_title", "authors", "main_description" ]
+    [ "title", "short_title", "authors", "main_description", "description" ]
       .map((n) => { // required string
         // main_description should get sanitized after this validation
         return [ n, {
@@ -65,8 +56,22 @@ const saveValidator = schema(Object.assign(
           },
           message: n + ' should be a valid url'
         } ];
-      }))
-));
+      }),
+  _.fromPairs(
+    [ 'tags', 'categories' ]
+      .map((n) => { // required string
+        // main_description should get sanitized after this validation
+        return [ n,     {
+          use: [ function(value) {
+            if(value == null)
+              return true;
+            return Array.isArray(value) &&
+              value.filter((s) => typeof s != 'string' || s.length==0).length == 0;
+          }, n + ' should be an array of non-empty string' ],
+          required: n + ' is required'
+        } ];
+      })
+  ))));
 const readonlyProps = ['date']
 
 exports.saveJSON = function(req, res) {
@@ -76,9 +81,10 @@ exports.saveJSON = function(req, res) {
     return res.sendStatus(400);
    }
 
-   var json = req.body;
+   var _json = req.body,
+       json = _.assign({}, _json);
   
-   var errors = saveValidator.validate(json, { strip: false })
+   var errors = saveValidator.validate(json)
 
    if(errors.length > 0) {
      return res.json({ error: errors[0].message });
@@ -120,7 +126,7 @@ exports.saveJSON = function(req, res) {
     json.moderated = false;
     json.tags.push("un-moderated");
 
-    if(json.dryrun) {
+    if(_json.dryrun) {
       return res.json({ "savedata": json });
     }
     
