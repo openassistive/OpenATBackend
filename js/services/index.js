@@ -72,8 +72,6 @@ function baseParamsMiddleWare(service, req, resp) {
   if(!req.result) // unexpected call
     return Promise.resolve();
   var promises = [];
-
-  req.result.service_name = service.name;
   
   if(req.result.short_title) {
     let itemFn = 'content/item/' + req.result.short_title + '.md';

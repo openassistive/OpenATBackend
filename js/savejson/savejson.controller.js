@@ -111,6 +111,15 @@ exports.saveJSON = function(req, res) {
      if(!json.date) // current time
        json.date = util.dateISOString(new Date());
 
+    // tags should be an array overwrite if it's not
+    if(!Array.isArray(json.tags))
+      json.tags = [];
+    
+    
+    // on save set as un-moderated (no matter what is the input)
+    json.moderated = false;
+    json.tags.push("un-moderated");
+
      if(json.dryrun) {
        return res.json({ "savedata": json });
      }
