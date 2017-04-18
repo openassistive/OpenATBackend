@@ -53,38 +53,53 @@ exports.readItemFromGithub = function(fn) {
    writes file to github
 */
 exports.writeFileToGithub = function(fileToSend,locationInGit) {
-   if (process.env.NODE_ENV=='development'){
+  return new Promise((resolve, reject) => {
+    if (process.env.NODE_ENV=='development'){
       console.log("Sending to:\n"+locationInGit);
       console.log("Sending data:\n"+fileToSend);
+      resolve();
       return true;
-   } else {
+    } else {
       var gh = Hubfs(GHOptions)
       fs.readFile(fileToSend, function (err,data) {
         if (err) {
+          reject(err);
           return console.log(err);
         }
         gh.writeFile(locationInGit, data, function (err) {
-        if (err) throw err
-        //console.log('It\'s saved!')
-        return true;
+          if (err)
+            reject(err);
+          else
+            resolve();
+          //console.log('It\'s saved!')
+          return true;
         })
       });
-   }
+    }
+  });
 }
 
 /*
    writes data to github
 */
 exports.writeDataToGithub = function(dataToSend, locationInGit, callback) {
-   if (process.env.NODE_ENV=='development'){
+  return new Promise((resolve, reject) => {
+    if (process.env.NODE_ENV=='development'){
       console.log("Sending to:\n"+locationInGit);
       console.log("Sending data:\n"+dataToSend);
+      resolve();
       return true;
-   } else {
+    } else {
       var gh = Hubfs(GHOptions);
       // token auth
-      gh.writeFile(locationInGit, dataToSend, callback);
-   }
+      gh.writeFile(locationInGit, dataToSend, function(err) {
+        if(err)
+          reject(err);
+        else
+          resolve();
+      });
+    }
+  });
 }
 
 exports.cloneObj = function(obj) {
@@ -137,30 +152,45 @@ exports.SaveImages = function(image_url,filename) {
    });
 };
 exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
-   var sharp = require('sharp');
-   var tmp = require('tmp');
-   tmp.file({ mode: parseInt('0644',8), prefix: 'openatimg-', postfix: '.jpg' },function _tempFileCreated(err, path, fd) {
-     if (err) throw err;
-     exports.download(image_url,path, function() {
-      var imaget = sharp(path)
-         .resize(250, 250)
-         .png()
-         .toFile('./tmp/download_image/' +filename+'-thumb.png', function(err) {
+  return new Promise((resolve, reject) => {
+    var sharp = require('sharp');
+    var tmp = require('tmp');
+    tmp.file({ mode: parseInt('0644',8), prefix: 'openatimg-', postfix: '.jpg' },function _tempFileCreated(err, path, fd) {
+      if (err) throw err;
+      exports.download(image_url,path, function() {
+        var imaget = sharp(path)
+            .resize(150)
+            .png()
+            .toFile('./tmp/download_image/' +filename+'-thumb.png', function(err) {
             });
 
-      var imagel = sharp(path)
-         .resize(500, 500)
-         .png()
-         .toFile('./tmp/download_image/' +filename+'.png', function(err) {
+        var imagel = sharp(path)
+            .resize(500)
+            .png()
+            .toFile('./tmp/download_image/' +filename+'.png', function(err) {
             });
       });
-   });
-   //Now write to Github - NB - NOT ASYNC. QUICK FIX
-   if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
-      exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png',locationInGit+filename+'-thumb.png');
-   }
+    });
+    var promises = [], dest_thumb, dest_image;
+    //Now write to Github - NB - NOT ASYNC. QUICK FIX
+    if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
+      dest_thumb = locationInGit+filename+'-thumb.png';
+      promises.push(
+        exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png', dest_thumb)
+      );
+    }
 
-   if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
-      exports.writeFileToGithub('./tmp/download_image/' +filename+'.png',locationInGit+filename+'.png');
-   }
+    if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
+      dest_image = locationInGit+filename+'.png';
+      promises.push(
+        exports.writeFileToGithub('./tmp/download_image/' +filename+'.png', dest_image)
+      );
+    }
+    Promise.all(promises).then(() => {
+      resolve({
+        thumb: dest_thumb,
+        image: dest_image
+      });
+    }, reject);
+  });
 };

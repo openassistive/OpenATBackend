@@ -120,21 +120,41 @@ exports.saveJSON = function(req, res) {
     json.moderated = false;
     json.tags.push("un-moderated");
 
-     if(json.dryrun) {
-       return res.json({ "savedata": json });
-     }
+    if(json.dryrun) {
+      return res.json({ "savedata": json });
+    }
+    
+    var promises = [];
+    
      // we need to write to GitHub - not just download
      // need to fix tags - maybe in the generateMDFile function
      if (json.image_download){
        console.log('about to save the images..');
-       contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'static/files/images/');
+       promises.push(
+         contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'static/files/images/')
+           .then(function(resp) {
+             if(resp.thumb)
+               json.thumb = resp.thumb;
+             if(resp.image)
+               json.image = resp.image;
+           })
+       );
      }
-     
-     contentCreator.writeDataToGithub(contentCreator.generateMDFile(json), itemFn, function (err) {
-       if (err) throw err
-       console.log('It\'s saved!')
-       return res.json({success: json.short_title});
-     });
-   }
+
+    Promise.all(promises)
+      .then(() => {
+        return contentCreator
+          .writeDataToGithub(contentCreator.generateMDFile(json), itemFn)
+      })
+      .then(() => {
+        console.log('It\'s saved!')
+        return res.json({success: json.short_title});
+      })
+      .catch((err) => {
+        res.json({error: "Internal error!\n"+(err.stack||err)});
+        if (err)
+          console.error(err);
+      });
+  }
 
 };
