@@ -104,8 +104,12 @@ exports.saveJSON = function(req, res) {
    // get date from existing file
    contentCreator.readItemFromGithub(itemFn)
      .then((resp) => {
-       for(let prop of readonlyProps)
-         json[prop] = resp.fm[prop];
+       for(let prop of readonlyProps) {
+         if(resp.fm[prop])
+           json[prop] = resp.fm[prop];
+         else
+           delete json[prop];
+       }
        save();
      })
      .catch((err) => {

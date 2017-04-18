@@ -169,28 +169,29 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
             .png()
             .toFile('./tmp/download_image/' +filename+'.png', function(err) {
             });
+        
+        var promises = [], dest_thumb, dest_image;
+        //Now write to Github - NB - NOT ASYNC. QUICK FIX
+        if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
+          dest_thumb = 'images/'+filename+'-thumb.png';
+          promises.push(
+            exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png', locationInGit+filename+'-thumb.png')
+          );
+        }
+
+        if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
+          dest_image = 'images/'+filename+'.png';
+          promises.push(
+            exports.writeFileToGithub('./tmp/download_image/' +filename+'.png', locationInGit+filename+'.png')
+          );
+        }
+        Promise.all(promises).then(() => {
+          resolve({
+            thumb: dest_thumb,
+            image: dest_image
+          });
+        }, reject);
       });
     });
-    var promises = [], dest_thumb, dest_image;
-    //Now write to Github - NB - NOT ASYNC. QUICK FIX
-    if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
-      dest_thumb = 'images/'+filename+'-thumb.png';
-      promises.push(
-        exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png', locationInGit+filename+'-thumb.png')
-      );
-    }
-
-    if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
-      dest_image = 'images/'+filename+'.png';
-      promises.push(
-        exports.writeFileToGithub('./tmp/download_image/' +filename+'.png', locationInGit+filename+'.png')
-      );
-    }
-    Promise.all(promises).then(() => {
-      resolve({
-        thumb: dest_thumb,
-        image: dest_image
-      });
-    }, reject);
   });
 };
