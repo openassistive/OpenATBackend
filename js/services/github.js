@@ -35,8 +35,6 @@ var fromApi = function(repoPath) {
         categories: ["software"],
         description: body.description,
         main_description: body.description,
-        image: 'images/full/' + body.name,
-        thumb: 'images/thumb/' + body.name,
         original_url: body.html_url
       };
 

@@ -74,7 +74,7 @@ const saveValidator = schema(Object.assign(
       })
   )
 ));
-const readonlyProps = ['date']
+const readonlyProps = ['date', 'thumb', 'image'];
 
 exports.saveJSON = function(req, res) {
 
@@ -120,9 +120,9 @@ exports.saveJSON = function(req, res) {
        json.date = util.dateISOString(new Date());
 
     // tags should be an array overwrite if it's not
-    if(!Array.isArray(json.tags))
-      json.tags = [];
-    
+    for(let f of ['tags','categories'])
+      if(!Array.isArray(json[f]))
+        json[f] = [];
     
     // on save set as un-moderated (no matter what is the input)
     json.moderated = false;
@@ -141,6 +141,8 @@ exports.saveJSON = function(req, res) {
        promises.push(
          contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'static/files/images/')
            .then(function(resp) {
+             res.json({"why":"save image resp: ","resp":resp});
+             return;
              if(resp.thumb)
                json.thumb = resp.thumb;
              if(resp.image)

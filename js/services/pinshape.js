@@ -21,8 +21,6 @@ exports.handler = function(req, res, next) {
         tags: ["un-tagged"],
         categories: ["hardware"],
         main_description: "",
-        image: "",
-        thumb: "",
         original_url: "",
         short_title: ""
       };
@@ -67,11 +65,6 @@ exports.handler = function(req, res, next) {
         result.image_download = 'http:' + (data[0].attribs['data-cfsrc']
           || $('img').first().attr("src"));
       });
-
-      if (result.image_download != undefined && result.image_download != "") {
-          result.image = "images/" + result.short_title + ".png";
-          result.thumb = "images/" + result.short_title + "-thumb.png";
-      }
 
       for (var index in result) {
          if (!result[index] || /^\s*$/.test(result[index])) {

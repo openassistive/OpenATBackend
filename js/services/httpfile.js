@@ -19,8 +19,6 @@ exports.handler = function(req, res, next) {
         project_url: "",
         description: "",
         main_description: "",
-        image: "",
-        thumb: "",
         original_url: "",
         short_title: ""
       };
@@ -60,11 +58,6 @@ exports.handler = function(req, res, next) {
       });
 
       result.image_download = ($("div.photoset-image img").first() || $('img').first()).attr("src");
-
-      if (result.image_download != undefined && result.image_download != "") {
-        result.image = "images/" + result.short_title + ".png";
-        result.thumb = "images/" + result.short_title + "-thumb.png";
-      }
 
       $("p.description").filter(function() {
         result.description = $(this).text();

@@ -21,8 +21,6 @@ exports.handler = function(req, res, next) {
         tags: ["un-tagged"],
         categories: ["software"],
         main_description: "",
-        image: "",
-        thumb: "",
         original_url: "",
         short_title: ""
       };
@@ -74,18 +72,14 @@ exports.handler = function(req, res, next) {
 
       if (!!img_url) {
         image = img_url.attr("src");
-        result.image = image;
         image_download = "http:" + image;
       } else {
         img_url = $('img').first();
         image = img_url.attr("src");
-        result.image = image;
         image_download = "http:" + image;
       }
 
       if (!!image) {
-        result.image = "images/" + result.short_title + ".png";
-        result.thumb = "images/" + result.short_title + "-thumb.png";
         result.image_download = image_download;
       }
 
