@@ -77,7 +77,7 @@ exports.saveJSON = function(req, res) {
    }
 
     var json = req.body;
-  JSON.stringify(json, null, '  ');
+  res.json({ "json": json })
   return;   
    var errors = saveValidator.validate(json)
 
