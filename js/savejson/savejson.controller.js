@@ -146,9 +146,9 @@ exports.saveJSON = function(req, res) {
          contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'static/files/images/')
            .then(function(resp) {
              if(resp.thumb)
-               json.thumb = resp.thumb;
+               json.thumb = 'images/' + resp.thumb;
              if(resp.image)
-               json.image = resp.image;
+               json.image = 'images/' + resp.image;
            })
        );
      }

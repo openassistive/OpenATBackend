@@ -169,8 +169,8 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
                 if(err)
                   reject(err);
                 else {
-                  dest_thumb = 'images/'+filename+'-thumb.png';
-                  exports.writeDataToGithub(outputBuffer, locationInGit+filename+'-thumb.png')
+                  dest_thumb = filename+'-thumb.png';
+                  exports.writeDataToGithub(outputBuffer, locationInGit+dest_thumb)
                     .then(resolve, reject);
                 }      
               });
@@ -184,8 +184,8 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
                 if(err)
                   reject(err);
                 else {
-                  dest_image = 'images/'+filename+'.png';
-                  exports.writeDataToGithub(outputBuffer, locationInGit+filename+'.png')
+                  dest_image = filename+'.png';
+                  exports.writeDataToGithub(outputBuffer, locationInGit+dest_image)
                     .then(resolve, reject);
                 }      
               });
