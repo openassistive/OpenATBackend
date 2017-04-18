@@ -76,8 +76,9 @@ exports.saveJSON = function(req, res) {
     return res.sendStatus(400);
    }
 
-   var json = req.body;
-
+    var json = req.body;
+  JSON.stringify(json, null, '  ');
+  return;   
    var errors = saveValidator.validate(json)
 
    if(errors.length > 0) {
