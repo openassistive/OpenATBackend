@@ -158,34 +158,45 @@ exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
     tmp.file({ mode: parseInt('0644',8), prefix: 'openatimg-', postfix: '.jpg' },function _tempFileCreated(err, path, fd) {
       if (err) throw err;
       exports.download(image_url,path, function() {
-        var imaget = sharp(path)
-            .resize(150)
-            .png()
-            .toFile('./tmp/download_image/' +filename+'-thumb.png', function(err) {
-            });
-
-        var imagel = sharp(path)
-            .resize(500)
-            .png()
-            .toFile('./tmp/download_image/' +filename+'.png', function(err) {
-            });
-        
         var promises = [], dest_thumb, dest_image;
-        //Now write to Github - NB - NOT ASYNC. QUICK FIX
-        if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
-          dest_thumb = 'images/'+filename+'-thumb.png';
-          promises.push(
-            exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png', locationInGit+filename+'-thumb.png')
-          );
-        }
-
-        if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
-          dest_image = 'images/'+filename+'.png';
-          promises.push(
-            exports.writeFileToGithub('./tmp/download_image/' +filename+'.png', locationInGit+filename+'.png')
-          );
-        }
-        Promise.all(promises).then(() => {
+        Promise.all([
+          new Promise((resolve, reject) => {
+            sharp(path)
+              .resize(150)
+              .png()
+              .toFile('./tmp/download_image/' +filename+'-thumb.png', function(err) {
+                if(err)
+                  reject(err);
+                else { 
+                  if (fs.existsSync('./tmp/download_image/' +filename+'-thumb.png')) {
+                    dest_thumb = 'images/'+filename+'-thumb.png';
+                    exports.writeFileToGithub('./tmp/download_image/' +filename+'-thumb.png', locationInGit+filename+'-thumb.png')
+                      .then(resolve, reject);
+                  } else {
+                    resolve();
+                  }
+                }
+              });
+          }),
+          new Promise((resolve, reject) => {
+            sharp(path)
+              .resize(500)
+              .png()
+              .toFile('./tmp/download_image/' +filename+'.png', function(err) {
+                if(err)
+                  reject(err);
+                else {
+                  if (fs.existsSync('./tmp/download_image/' +filename+'.png')) {
+                    dest_image = 'images/'+filename+'.png';
+                    exports.writeFileToGithub('./tmp/download_image/' +filename+'.png', locationInGit+filename+'.png')
+                      .then(resolve, reject);
+                  } else {
+                    resolve();
+                  }
+                }
+              })
+          })
+        ]).then(() => {
           resolve({
             thumb: dest_thumb,
             image: dest_image
