@@ -145,8 +145,6 @@ exports.saveJSON = function(req, res) {
        promises.push(
          contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'static/files/images/')
            .then(function(resp) {
-             res.json({"why":"save image resp: ","resp":resp});
-             return;
              if(resp.thumb)
                json.thumb = resp.thumb;
              if(resp.image)
