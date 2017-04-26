@@ -177,7 +177,7 @@ exports.saveJSON = function(req, res) {
     
     contentCreator.downloadFileToBuffer(json.image_download)
       .then(function(imagedata) {
-        var sha = crypto.createHash('sha256').update(imagedata).digest();
+        var sha = crypto.createHash('sha256').update(imagedata).digest().toString('hex');
         if(json.image_download_sha == sha)
           console.log("Image is the same");
         else
