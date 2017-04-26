@@ -60,6 +60,11 @@ exports.readItemFromGithub = function(fn) {
 
 let nextCommitPromise = Promise.resolve();
 
+function catch_checkpoint(err) {
+  console.error(new Error().stack);
+  throw err;
+}
+
 /** @brief commit changes to frontend github
  * @param branch the branch to work on
  * @param message of the commit
@@ -70,7 +75,6 @@ exports.commitChangesToGithub = function(branch, message, changes) {
   let repo = new Octokat(GHOptions.auth).repos(GHOptions.owner,GHOptions.repo);
 
   // stage one <upload>
-  console.log('changes to create', changes)
   return Promise.all(changes.map((change, index) => {
     let blob = _.fromPairs(
       [ 'content', 'encoding' ].map((f) => {
@@ -81,18 +85,22 @@ exports.commitChangesToGithub = function(branch, message, changes) {
     );
     return repo.git.blobs.create(blob);
   }))
+    .catch(catch_checkpoint())
     .then((results) => {
       // stage two commit
       return nextCommitPromise = nextCommitPromise
+        .catch((err) => null) // catch -> then
         .then(() => {
           console.log('refs heads', branch);
           return repo.git.refs.heads(branch).fetch()
+            .catch(catch_checkpoint())
             .then((ref) => {
               console.log('branch', ref);
               if(ref.object.type != 'commit')
                 throw new Error(`branch '${branch}' has unexpected ` +
                                 `ref to ${ref.object.type}`);
               return repo.git.commits.fetch({ sha: ref.object.sha })
+                .catch(catch_checkpoint())
                 .then((commit) => {
                   console.log("commit", commit);
                   // add the tree
@@ -115,6 +123,7 @@ exports.commitChangesToGithub = function(branch, message, changes) {
                     })
                   });
                 })
+                .catch(catch_checkpoint())
                 .then((tree) => {
                   // create commit
                   return repo.git.commits.create({
@@ -124,11 +133,13 @@ exports.commitChangesToGithub = function(branch, message, changes) {
                   });
                   repo.git.refs.heads(branch).fetch()
                 })
+                .catch(catch_checkpoint())
                 .then((newcommit) => {
                   // update branch ref
                   return repo.git.refs.heads(branch)
                     .update({ sha: newcommit.sha });
-                });
+                })
+                .catch(catch_checkpoint());
             });
         });
     });
