@@ -144,7 +144,7 @@ exports.saveJSON = function(req, res) {
       })
       .catch((err) => {
         if(err.status != 404) {
-          console.error(`on readItemFromGithub(${itemFn})`);
+          console.error(`Error on readItemFromGithub(${itemFn})`);
           console.error(err); // log for debugging
         }
         save();
@@ -178,6 +178,10 @@ exports.saveJSON = function(req, res) {
     contentCreator.downloadFileToBuffer(json.image_download)
       .then(function(imagedata) {
         var sha = crypto.createHash('sha256').update(imagedata).digest();
+        if(json.image_download_sha == sha)
+          console.log("Image is the same");
+        else
+          console.log("Add images");
         if(json.image_download_sha != sha) { // add images
           json.image_download_sha = sha;
           return contentCreator.createItemImages(imagedata)
@@ -211,6 +215,7 @@ exports.saveJSON = function(req, res) {
           encoding: 'utf-8',
           path: itemFn
         });
+        console.log("commitChangesToGithub");
         return contentCreator
           .commitChangesToGithub('master', `Update item ${json.short_title}`,
                                  changes);
