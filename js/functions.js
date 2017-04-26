@@ -196,10 +196,10 @@ exports.createItemImages = function(data) {
         });
     })
   ]).then((out) => {
-    resolve({
+    return {
       thumb: out[0],
       image: out[1]
-    });
+    };
   });
 }
 
