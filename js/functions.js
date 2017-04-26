@@ -91,6 +91,7 @@ exports.commitChangesToGithub = function(branch, message, changes) {
                                 `ref to ${ref.object.type}`);
               return repo.commits.fetch({ sha: ref.object.sha })
                 .then((commit) => {
+                  console.log("commit", commit);
                   // add the tree
                   return repo.git.trees.create({
                     base_tree: commit.tree.sha,
