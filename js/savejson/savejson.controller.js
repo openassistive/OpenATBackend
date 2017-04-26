@@ -144,7 +144,7 @@ exports.saveJSON = function(req, res) {
         save();
       })
       .catch((err) => {
-        if(err.status != 404) {
+        if(err.status != 404 && err.message != 'File not found') {
           console.error(`Error on readItemFromGithub(${itemFn})`);
           console.error(err); // log for debugging
         }
@@ -179,10 +179,6 @@ exports.saveJSON = function(req, res) {
     contentCreator.downloadFileToBuffer(json.image_download)
       .then(function(imagedata) {
         var sha = crypto.createHash('sha256').update(imagedata).digest().toString('hex');
-        if(json.image_download_sha == sha)
-          console.log("Image is the same");
-        else
-          console.log("Add images");
         if(json.image_download_sha != sha) { // add images
           json.image_download_sha = sha;
           return contentCreator.createItemImages(imagedata)

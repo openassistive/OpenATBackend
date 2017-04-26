@@ -70,6 +70,7 @@ exports.commitChangesToGithub = function(branch, message, changes) {
   let repo = new Octokat(GHOptions.auth).repos(GHOptions.owner,GHOptions.repo);
 
   // stage one <upload>
+  console.log('changes to create', changes)
   return Promise.all(changes.map((change, index) => {
     let blob = _.fromPairs(
       [ 'content', 'encoding' ].map((f) => {
@@ -84,8 +85,10 @@ exports.commitChangesToGithub = function(branch, message, changes) {
       // stage two commit
       return nextCommitPromise = nextCommitPromise
         .then(() => {
+          console.log('refs heads', branch);
           return repo.git.refs.heads(branch).fetch()
             .then((ref) => {
+              console.log('branch', ref);
               if(ref.object.type != 'commit')
                 throw new Error(`branch '${branch}' has unexpected ` +
                                 `ref to ${ref.object.type}`);
