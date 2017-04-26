@@ -51,9 +51,9 @@ exports.readItemFromGithub = function(fn) {
   return exports.readFromGithub(fn)
     .then((data) => {
         try {
-          resolve(util.parseItem(data.toString('utf8')));
+          return util.parseItem(data.toString('utf8'));
         } catch(err) {
-          reject(err);
+          throw err;
         }
     });
 }
