@@ -163,7 +163,7 @@ exports.saveJSON = function(req, res) {
     json.relayed_by_ip = req.connection.remoteAddress;
 
     if(_json.dryrun) {
-      return res.json({ "savedata": json });
+      return res.json({ "savedata": json, "headers": req.headers });
     }
     
     var promises = [];
