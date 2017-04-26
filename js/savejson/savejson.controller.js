@@ -84,7 +84,10 @@ exports.saveJSON = function(req, res) {
   }
 
   var _json = req.body,
-      json = _.assign({}, _json);
+      json = _.assign({}, _json),
+      relayed_by_ip = (req.headers['x-forwarded-for'] ?
+                       req.headers['x-forwarded-for'] :
+                       req.connection.remoteAddress);
 
   var recaptcha_resp = _json['g-recaptcha-response'];
   if(!recaptcha_resp)
@@ -93,7 +96,7 @@ exports.saveJSON = function(req, res) {
     form: {
       secret: process.env.RecaptchaSecret,
       response: recaptcha_resp,
-      remoteip: req.connection.remoteAddress
+      remoteip: relayed_by_ip
     }
   }, (err, resp, body) => {
     try {
@@ -160,10 +163,10 @@ exports.saveJSON = function(req, res) {
     json.tags.push("un-moderated");
 
     // set remoteip
-    json.relayed_by_ip = req.connection.remoteAddress;
+    json.relayed_by_ip = relayed_by_ip;
 
     if(_json.dryrun) {
-      return res.json({ "savedata": json, "headers": req.headers });
+      return res.json({ "savedata": json });
     }
     
     var promises = [];
