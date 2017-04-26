@@ -145,7 +145,7 @@ exports.downloadFileToBuffer = function(url, options) {
   if(options === undefined)
     options = exports.downloadFileToBufferDefaultOptions;
   return new Promise((resolve, reject) => {
-    request.head(uri, function(err, resp, body) {
+    request.head(url, function(err, resp, body) {
       if(err)
         return reject(err);
       var contentLength = parseInt(resp.headers['content-length']);
