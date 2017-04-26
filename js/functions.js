@@ -63,7 +63,9 @@ let nextCommitPromise = Promise.resolve();
 function catch_checkpoint() {
   let err0 = new Error();
   return function(err) {
-    console.error(err0.stack);
+    if(!err.__checkpoint_throwed)
+      console.error("Error checkpoint: ", err0.stack.slice("\n").slice(2).join("\n"));
+    err.__checkpoint_throwed = true;
     throw err;
   }
 }
@@ -97,14 +99,12 @@ exports.commitChangesToGithub = function(branch, message, changes) {
           return repo.git.refs.heads(branch).fetch()
             .catch(catch_checkpoint())
             .then((ref) => {
-              console.log('branch', ref);
               if(ref.object.type != 'commit')
                 throw new Error(`branch '${branch}' has unexpected ` +
                                 `ref to ${ref.object.type}`);
-              return repo.git.commits.fetch({ sha: ref.object.sha })
+              return repo.git.commits(ref.object.sha).fetch()
                 .catch(catch_checkpoint())
                 .then((commit) => {
-                  console.log("commit", commit);
                   // add the tree
                   return repo.git.trees.create({
                     base_tree: commit.tree.sha,
