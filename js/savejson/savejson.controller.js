@@ -83,8 +83,9 @@ exports.saveJSON = function(req, res) {
     console.log('no body');
     return res.sendStatus(400);
   }
-
-  var _json = req.body,
+  
+  var itemFn,
+      _json = req.body,
       json = _.assign({}, _json),
       relayed_by_ip = (req.headers['x-forwarded-for'] ?
                        req.headers['x-forwarded-for'] :
@@ -128,7 +129,7 @@ exports.saveJSON = function(req, res) {
     // convert dates
     json.datemod = util.dateISOString(Date.parse(json.datemod))
 
-    let itemFn = 'content/item/'+json.short_title + '.md';
+    itemFn = 'content/item/'+json.short_title + '.md';
 
     // assuming `date' is readonly, It's the save time if overwriting then
     // get date from existing file
