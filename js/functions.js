@@ -170,7 +170,7 @@ exports.createItemImages = function(data) {
   var sharp = require('sharp');
   return Promise.all([
     new Promise((resolve, reject) => {
-      sharp(path)
+      sharp(data)
         .resize(150)
         .min() // ensure that image width is atleast 150px or the size of image
         .png()
@@ -183,7 +183,7 @@ exports.createItemImages = function(data) {
         });
     }),
     new Promise((resolve, reject) => {
-      sharp(path)
+      sharp(data)
         .resize(500)
         .max() // ensure that image width is atmost 500px or the size of image
         .png()
