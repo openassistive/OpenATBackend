@@ -6,6 +6,7 @@ const schema = require('validate')
 const _ = require('lodash')
 const sanitizeHtml = require('sanitize-html')
 const url = require('url')
+const crypto = require('crypto')
 
 const saveValidator = schema(Object.assign(
   {
@@ -74,7 +75,7 @@ const saveValidator = schema(Object.assign(
       })
   )
 ));
-const readonlyProps = ['date', 'thumb', 'image'];
+const readonlyProps = ['date', 'thumb', 'image', 'image_download_sha'];
 
 exports.saveJSON = function(req, res) {
 
@@ -142,16 +143,19 @@ exports.saveJSON = function(req, res) {
         save();
       })
       .catch((err) => {
-        console.error(err); // log for debugging
+        if(err.status != 404) {
+          console.error(`on readItemFromGithub(${itemFn})`);
+          console.error(err); // log for debugging
+        }
         save();
       });
   }
   
   function save() {
 
-     // set initial value on null
-     if(!json.date) // current time
-       json.date = util.dateISOString(new Date());
+    // set initial value on null
+    if(!json.date) // current time
+      json.date = util.dateISOString(new Date());
 
     // tags should be an array overwrite if it's not
     for(let f of ['tags','categories'])
@@ -168,28 +172,48 @@ exports.saveJSON = function(req, res) {
     if(_json.dryrun) {
       return res.json({ "savedata": json });
     }
-    
-    var promises = [];
-    
-     // we need to write to GitHub - not just download
-     // need to fix tags - maybe in the generateMDFile function
-     if (json.image_download){
-       console.log('about to save the images..');
-       promises.push(
-         contentCreator.SaveImagesToGitHub(json.image_download, json.short_title, 'static/files/images/')
-           .then(function(resp) {
-             if(resp.thumb)
-               json.thumb = 'images/' + resp.thumb;
-             if(resp.image)
-               json.image = 'images/' + resp.image;
-           })
-       );
-     }
 
-    Promise.all(promises)
-      .then(() => {
+    var changes = [];
+    
+    contentCreator.downloadFileToBuffer(json.image_download)
+      .then(function(imagedata) {
+        var sha = crypto.createHash('sha256').update(imagedata).digest();
+        if(json.image_download_sha != sha) { // add images
+          json.image_download_sha = sha;
+          return contentCreator.createItemImages(imagedata)
+            .then(function(resp) { // response has png images
+              var images_dir = 'static/files/images/',
+                  images_site_path = 'images/'
+              if(resp.thumb) {
+                var name = json.short_title + '-thumb.png';
+                changes.push({
+                  content: resp.thumb.toString('base64'),
+                  encoding: 'base64',
+                  path: images_dir + name
+                });
+                json.thumb = images_site_path + name
+              }
+              if(resp.image) {
+                var name = json.short_title + '.png';
+                changes.push({
+                  content: resp.image.toString('base64'),
+                  encoding: 'base64',
+                  path: images_dir + name
+                });
+                json.thumb = images_site_path + name
+              }
+            })
+        }
+      })
+      .then(() => { // final step
+        changes.push({
+          content: contentCreator.generateMDFile(json),
+          encoding: 'utf-8',
+          path: itemFn
+        });
         return contentCreator
-          .writeDataToGithub(contentCreator.generateMDFile(json), itemFn)
+          .commitChangesToGithub('master', `Update item ${json.short_title}`,
+                                 changes);
       })
       .then(() => {
         console.log('It\'s saved!')

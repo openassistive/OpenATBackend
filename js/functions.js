@@ -7,6 +7,8 @@ var sharp = require('sharp');
 var Hubfs = require('hubfs.js')
 var toTitleCase = require('titlecase')
 var yamljs = require("yamljs")
+const Octokat = require('octokat')
+const _ = require('lodash')
 
 const util = require('./util')
 
@@ -30,7 +32,7 @@ exports.genShortTitle = function(strLongTitle) {
    return short_title;
 };
 
-exports.readItemFromGithub = function(fn) {
+exports.readFromGithub = function(fn) {
   var gh = Hubfs(GHOptions)
   // item known to have yaml fm
   // and content in markdown format
@@ -39,17 +41,169 @@ exports.readItemFromGithub = function(fn) {
       if(err) {
         reject(err);
       } else {
-        try {
-          resolve(util.parseItem(data.toString('utf8')));
-        } catch(err) {
-          reject(err);
-        }
+        resolve(data);
       }
     });
   });
 }
 
-/*
+exports.readItemFromGithub = function(fn) {
+  return exports.readFromGithub(fn)
+    .then((data) => {
+        try {
+          resolve(util.parseItem(data.toString('utf8')));
+        } catch(err) {
+          reject(err);
+        }
+    });
+}
+
+let nextCommitPromise = Promise.resolve();
+
+/** @brief commit changes to frontend github
+ * @param branch the branch to work on
+ * @param message of the commit
+ * @param changes is a list of blob files to change
+ * @return promise at completion
+ */
+exports.commitChangesToGithub = function(branch, message, changes) {
+  let repo = new Octokat(GHOptions.auth).repos(GHOptions.owner,GHOptions.repo);
+
+  // stage one <upload>
+  return Promise.all(changes.map((change, index) => {
+    let blob = _.fromPairs(
+      [ 'content', 'encoding' ].map((f) => {
+        if(!change[f])
+          throw new Error(`change[${index}] needs ${f}`)
+        return [ f, change[f] ]
+      })
+    );
+    return repo.git.blobs.create(blob);
+  }))
+    .then((results) => {
+      // stage two commit
+      return nextCommitPromise = nextCommitPromise
+        .then(() => {
+          return repo.git.refs.heads(branch).fetch()
+            .then((ref) => {
+              if(ref.object.type != 'commit')
+                throw new Error(`branch '${branch}' has unexpected ` +
+                                `ref to ${ref.object.type}`);
+              return repo.commits.fetch({ sha: ref.object.sha })
+                .then((commit) => {
+                  // add the tree
+                  return repo.git.trees.create({
+                    base_tree: commit.tree.sha,
+                    tree: results.map((blobRes, index) => {
+                      let change = changes[index];
+                      return Object.assign(
+                        {
+                          sha: blobRes.sha,
+                          mode: '100644',
+                          type: 'blob'
+                        },
+                        _.fromPairs(
+                          [ 'mode', 'path' ]
+                            .map((f) => [ f, change[f] ])
+                            .filter((v) => !!v[1])
+                        )
+                      );
+                    })
+                  });
+                })
+                .then((tree) => {
+                  // create commit
+                  return repo.git.commits.create({
+                    message,
+                    tree: tree.sha,
+                    parents: [ ref.object.sha ]
+                  });
+                  repo.git.refs.heads(branch).fetch()
+                })
+                .then((newcommit) => {
+                  // update branch ref
+                  return repo.git.refs.heads(branch)
+                    .update({ sha: newcommit.sha });
+                });
+            });
+        });
+    });
+}
+
+/** @brief default options for downloadFileToBuffer
+ */
+exports.downloadFileToBufferDefaultOptions = {
+  limit: 2 * 1024 * 1024, // 2MiB
+};
+
+/** @brief download a file from net, return the content as buffer
+ * @param url of file
+ * @param [options] currently has limit
+ * @return promise of content buffer
+ */
+exports.downloadFileToBuffer = function(url, options) {
+  if(options === undefined)
+    options = exports.downloadFileToBufferDefaultOptions;
+  return new Promise((resolve, reject) => {
+    request.head(uri, function(err, resp, body) {
+      if(err)
+        return reject(err);
+      var contentLength = parseInt(resp.headers['content-length']);
+      if(isNaN(contentLength) || contentLength > options.limit) {
+        reject(new Error(`Invalid file size ${contentLength}`));
+      } else {
+        request({ url: url, encoding: null }, function(err, resp, body) {
+          if(err)
+            return reject(err);
+          resolve(body);
+        });
+      }
+    });
+  });
+}
+
+/** @brief creates images for an item from input data
+ * @param data input data
+ * @return promise of a dict with images data
+ */
+exports.createItemImages = function(data) {
+  var sharp = require('sharp');
+  return Promise.all([
+    new Promise((resolve, reject) => {
+      sharp(path)
+        .resize(150)
+        .min() // ensure that image width is atleast 150px or the size of image
+        .png()
+        .toBuffer(function (err, outputBuffer, info) {
+          // info.width and info.height contain the dimensions of the resized image
+          if(err)
+            reject(err);
+          else
+            resolve(outputBuffer);
+        });
+    }),
+    new Promise((resolve, reject) => {
+      sharp(path)
+        .resize(500)
+        .max() // ensure that image width is atmost 500px or the size of image
+        .png()
+        .toBuffer(function (err, outputBuffer, info) {
+          // info.width and info.height contain the dimensions of the resized image
+          if(err)
+            reject(err);
+          else
+            resolve(outputBuffer);
+        });
+    })
+  ]).then((out) => {
+    resolve({
+      thumb: out[0],
+      image: out[1]
+    });
+  });
+}
+
+/** @deprecated
    writes file to github
 */
 exports.writeFileToGithub = function(fileToSend,locationInGit) {
@@ -79,7 +233,7 @@ exports.writeFileToGithub = function(fileToSend,locationInGit) {
   });
 }
 
-/*
+/** @deprecated
    writes data to github
 */
 exports.writeDataToGithub = function(dataToSend, locationInGit) {
@@ -130,6 +284,8 @@ exports.download = function(uri, filename, callback) {
     });
 };
 
+/** @deprecated
+ */
 exports.SaveImages = function(image_url,filename) {
    var sharp = require('sharp');
    var tmp = require('tmp');
@@ -151,6 +307,8 @@ exports.SaveImages = function(image_url,filename) {
               });
    });
 };
+/** @deprecated
+ */
 exports.SaveImagesToGitHub = function(image_url,filename,locationInGit) {
   return new Promise((resolve, reject) => {
     var sharp = require('sharp');
