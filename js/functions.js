@@ -60,9 +60,12 @@ exports.readItemFromGithub = function(fn) {
 
 let nextCommitPromise = Promise.resolve();
 
-function catch_checkpoint(err) {
-  console.error(new Error().stack);
-  throw err;
+function catch_checkpoint() {
+  let err0 = new Error();
+  return function(err) {
+    console.error(err0.stack);
+    throw err;
+  }
 }
 
 /** @brief commit changes to frontend github
@@ -91,7 +94,6 @@ exports.commitChangesToGithub = function(branch, message, changes) {
       return nextCommitPromise = nextCommitPromise
         .catch((err) => null) // catch -> then
         .then(() => {
-          console.log('refs heads', branch);
           return repo.git.refs.heads(branch).fetch()
             .catch(catch_checkpoint())
             .then((ref) => {
