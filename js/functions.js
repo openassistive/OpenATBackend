@@ -89,7 +89,7 @@ exports.commitChangesToGithub = function(branch, message, changes) {
               if(ref.object.type != 'commit')
                 throw new Error(`branch '${branch}' has unexpected ` +
                                 `ref to ${ref.object.type}`);
-              return repo.commits.fetch({ sha: ref.object.sha })
+              return repo.git.commits.fetch({ sha: ref.object.sha })
                 .then((commit) => {
                   console.log("commit", commit);
                   // add the tree
