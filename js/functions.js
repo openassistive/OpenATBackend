@@ -58,17 +58,21 @@ exports.readItemFromGithub = function(fn) {
     });
 }
 
-let nextCommitPromise = Promise.resolve();
+let itemChangeQueuePromise = Promise.resolve();
 
-function catch_checkpoint() {
-  let err0 = new Error();
-  return function(err) {
-    if(!err.__checkpoint_throwed)
-      console.error("Error checkpoint: ", err0.stack.slice("\n").slice(2).join("\n"));
-    err.__checkpoint_throwed = true;
-    throw err;
-  }
+/** @brief queue to perform changes on item
+ * This is necessary for performing a change to items at a time
+ * if it needs modifying `items_index.csv` queueing it is necessary
+ * @param callback is trigger when green light is on for it, 
+ *        It should return a promise on finish
+ * @return promise at callback finish
+ */
+exports.itemChangeQueue = function(callback) {
+  return itemChangeQueuePromise = itemChangeQueuePromise
+    .then(() => callback());
 }
+
+let nextCommitPromise = Promise.resolve();
 
 /** @brief commit changes to frontend github
  * @param branch the branch to work on
@@ -81,29 +85,56 @@ exports.commitChangesToGithub = function(branch, message, changes) {
 
   // stage one <upload>
   return Promise.all(changes.map((change, index) => {
-    let blob = _.fromPairs(
-      [ 'content', 'encoding' ].map((f) => {
-        if(!change[f])
-          throw new Error(`change[${index}] needs ${f}`)
-        return [ f, change[f] ]
-      })
-    );
-    return repo.git.blobs.create(blob);
+    // for streams...
+    // blobs can get posted in raw format "application/vnd.github.VERSION.raw"
+    // it helps for performing pipe on input streams
+    // apparently octokat does not support it, I'll simply it by downgrading
+    // back to buffered data
+    // TODO:: upgrade stream upload to save memory
+    if(change.stream) {
+      // no encoding for streams
+      return new Promise((resolve, reject) => {
+        var bufs = [],
+            cancel = false;
+        change.stream.on('error', (err) => {
+          cancel = true; 
+          reject(err)
+        });
+        change.stream.on('data', (d) => bufs.push(d));
+        change.stream.on('end', () => {
+          if(cancel)
+            return;
+          var buf = Buffer.concat(bufs);
+          repo.git.blobs.create({ content: buf.toString('base64'),
+                                  encoding: 'base64' })
+            .then(resolve, reject);
+        });
+      });
+    } else {
+      let blob = _.fromPairs(
+        [ 'content', 'encoding' ].map((f) => {
+          if(!change[f])
+            throw new Error(`change[${index}] needs ${f}`)
+          return [ f, change[f] ]
+        })
+      );
+      return repo.git.blobs.create(blob);
+    }
   }))
-    .catch(catch_checkpoint())
+    .catch(util.catchCheckpoint())
     .then((results) => {
       // stage two commit
       return nextCommitPromise = nextCommitPromise
         .catch((err) => null) // catch -> then
         .then(() => {
           return repo.git.refs.heads(branch).fetch()
-            .catch(catch_checkpoint())
+            .catch(util.catchCheckpoint())
             .then((ref) => {
               if(ref.object.type != 'commit')
                 throw new Error(`branch '${branch}' has unexpected ` +
                                 `ref to ${ref.object.type}`);
               return repo.git.commits(ref.object.sha).fetch()
-                .catch(catch_checkpoint())
+                .catch(util.catchCheckpoint())
                 .then((commit) => {
                   // add the tree
                   return repo.git.trees.create({
@@ -125,7 +156,7 @@ exports.commitChangesToGithub = function(branch, message, changes) {
                     })
                   });
                 })
-                .catch(catch_checkpoint())
+                .catch(util.catchCheckpoint())
                 .then((tree) => {
                   // create commit
                   return repo.git.commits.create({
@@ -135,13 +166,13 @@ exports.commitChangesToGithub = function(branch, message, changes) {
                   });
                   repo.git.refs.heads(branch).fetch()
                 })
-                .catch(catch_checkpoint())
+                .catch(util.catchCheckpoint())
                 .then((newcommit) => {
                   // update branch ref
                   return repo.git.refs.heads(branch)
                     .update({ sha: newcommit.sha });
                 })
-                .catch(catch_checkpoint());
+                .catch(util.catchCheckpoint());
             });
         });
     });
@@ -184,7 +215,6 @@ exports.downloadFileToBuffer = function(url, options) {
  * @return promise of a dict with images data
  */
 exports.createItemImages = function(data) {
-  var sharp = require('sharp');
   return Promise.all([
     new Promise((resolve, reject) => {
       sharp(data)

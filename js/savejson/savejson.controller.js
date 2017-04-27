@@ -7,6 +7,7 @@ const _ = require('lodash')
 const sanitizeHtml = require('sanitize-html')
 const url = require('url')
 const crypto = require('crypto')
+const items_index = require('../core/items_index')
 
 const saveValidator = schema(Object.assign(
   {
@@ -207,15 +208,35 @@ exports.saveJSON = function(req, res) {
         }
       })
       .then(() => { // final step
-        changes.push({
-          content: contentCreator.generateMDFile(json),
-          encoding: 'utf-8',
-          path: itemFn
+        return contentCreator.itemChangeQueue(() => { // on green
+          let indexStream = items_index.performChangesDuplex([json]);
+          // TODO:: modify to stream mode, no full buffer
+          contentCreator.readFromGithub(items_index.filePath)
+            .then((data) => {
+              indexStream.write(data);
+              indexStream.end();
+            })
+            .catch((err) => {
+              if(err.status != 404 && err.message != 'File not found') {
+                indexStream.emit('error', err);
+              }
+              indexStream.end();
+            });
+          changes = changes.concat([
+            {
+              stream: indexStream,
+              path: items_index.filePath
+            },
+            {
+              content: contentCreator.generateMDFile(json),
+              encoding: 'utf-8',
+              path: itemFn
+            }
+          ]);
+          return contentCreator
+            .commitChangesToGithub('master', `Update item ${json.short_title}`,
+                                   changes);
         });
-        console.log("commitChangesToGithub");
-        return contentCreator
-          .commitChangesToGithub('master', `Update item ${json.short_title}`,
-                                 changes);
       })
       .then(() => {
         console.log('It\'s saved!')

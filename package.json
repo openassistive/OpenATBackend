@@ -12,6 +12,7 @@
     "body-parser": "^1.15.2",
     "cheerio": "latest",
     "cors": "^2.8.1",
+    "csv": "^1.1.1",
     "datejs": "^1.0.0-rc3",
     "express": "latest",
     "hubfs.js": "^1.0.0",

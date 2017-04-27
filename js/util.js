@@ -1,11 +1,24 @@
 const yamljs = require("yamljs")
 
+function catchCheckpoint() {
+  let err0 = new Error();
+  return function(err) {
+    if(!err.__checkpoint_thrown) {
+      console.error("Error checkpoint: \n" +
+                    err0.stack.slice("\n").slice(2).join("\n"));
+      err.__checkpoint_thrown = true;
+    }
+    throw err;
+  }
+}
+
 function prefixFixedString(str, fill, num) {
   str = str+'';
   return fill.repeat(Math.floor((num - str.length) / fill.length)) + str;
 }
 
 module.exports = {
+  catchCheckpoint: catchCheckpoint,
   parseItem: (data) => {
     var lines = data.split(/\r\n|\n/g);
     // parse yamljs

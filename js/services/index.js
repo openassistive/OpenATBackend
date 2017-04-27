@@ -3,6 +3,7 @@
 var url = require('url');
 var Router = require('express').Router;
 var contentCreator = require('../functions');
+const items_index = require('../core/items_index')
 
 var allServices = module.exports.allServices = [
   {
@@ -74,15 +75,19 @@ function baseParamsMiddleWare(service, req, resp) {
   var promises = [];
   
   if(req.result.short_title) {
-    let itemFn = 'content/item/' + req.result.short_title + '.md';
     promises.push(
-      contentCreator.readItemFromGithub(itemFn)
-        .then((resp) => {
-          req.result.exists = true;
-          // simple relative url
-          req.result.current_url = "/item/" + req.result.short_title;
+      items_index.searchForItem(req.result)
+        .then((found) => {
+          if(found) {
+            req.result.exists = true;
+            // simple relative url
+            req.result.current_url = "/item/" + found.short_title;
+          } else {
+            req.result.exists = false;
+          }
         })
-        .catch((err) => {
+        .catch((err) => { // skip error
+          console.error(err);
           req.result.exists = false;
         })
     );
