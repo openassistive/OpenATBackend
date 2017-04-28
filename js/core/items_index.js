@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const csv = require('csv')
 const contentCreator = require('../functions');
 
