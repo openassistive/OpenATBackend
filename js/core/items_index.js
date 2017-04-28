@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const csv = require('csv')
-const contentCreator = require('../functions');
+const contentCreator = require('../functions')
+const duplexer2 = require('duplexer2')
 
 exports.filePath = 'items_index.csv';
 exports.updateEvery = 1 * 60 * 1000;
@@ -10,19 +11,26 @@ exports.updateEvery = 1 * 60 * 1000;
  */
 const itemsIndexFields = {
   short_title: 0,
-  project_link: 1
+  project_url: 1
 };
-const itemsIndexFieldsLength = Object.keys(itemsIndexFields).length;
+const itemsIndexFieldKeys = Object.keys(itemsIndexFields);
+const itemsIndexFieldsLength = itemsIndexFieldKeys.length;
 
 /** @brief modify items_index.csv content
  *  @param items changes to perform (short_title is the identifier)
- *  @return Duplex stream
+ *  @return transform stream
  */
-exports.performChangesDuplex = function(items) {
-  items = items.concat();
-  let items_map = _.fromPairs(
-    items.map((item, index) => [ item.short_title, index ])
-  );
+exports.performChangesTransform = function(changes) {
+  function mkrow(item) {
+    let row = [];
+    for(let field in itemsIndexFields) {
+      if(!(field in item))
+        throw new Error(`Cannot index item \`${field}\` does not exists`);
+      row[itemsIndexFields[field]] = item[field];
+    }
+    return row;
+  }
+  changes = changes.concat();
   let editcsv = csv.transform((record) => {
     // validate
     if(record.length != itemsIndexFieldsLength ||
@@ -30,36 +38,48 @@ exports.performChangesDuplex = function(items) {
       // invalid record remove it
       return null;
     } else {
-      let idx = items_map[record[itemsIndexFields.short_title]];
-      if(idx !== undefined)
-        return items.splice(idx, 1)[0]; // replace
+      let short_title = record[itemsIndexFields.short_title];
+      let idx = changes.findIndex((c) => c.item.short_title == short_title);
+      if(idx != -1) {
+        let change = changes.splice(idx, 1)[0];
+        if(change.task == 'upsert')
+          return mkrow(change.item); // replace
+        else if(change.task == 'delete')
+          return null;
+        else
+          return record;
+      }
     }
+    return null;
   })
-  let outcsv = csv.stringify()
+  let outcsv = csv.stringify();
+  let parser = csv.parse();
   editcsv.on('end', function() {
     // add remaining
-    while(items.length > 0)
-      outcsv.write(items.shift())
+    var change;
+    while(change = changes.shift()) {
+      if(change.task == 'upsert')
+        outcsv.write(mkrow(change.item));
+    }
     outcsv.end()
   });
-  return csv.parse()
-    .pipe(editcsv)
-    .pipe(outcsv, { end: false });
+  parser.pipe(editcsv).pipe(outcsv, { end: false });
+  return duplexer2(parser, outcsv);
 }
 
 /* for now index in a dict and update on interval limit
  */
 let lastUpdate = 0, // zero means no data
-    itemsByShortTitle = {},
-    itemsByProjectUrl = {};
+    rowsByShortTitle = {},
+    rowsByProjectUrl = {};
 function prepareForSearch() {
   if(new Date().getTime() - exports.updateEvery > lastUpdate) {
     return contentCreator.readFromGithub(exports.filePath)
       .then((data) => {
         return new Promise((resolve, reject) => {
-          itemsByShortTitle = {};
-          itemsByProjectUrl = {};
-          let parser = csv.parser(),
+          rowsByShortTitle = {};
+          rowsByProjectUrl = {};
+          let parser = csv.parse(),
               cancel = false;
           parser.on('error', (err) => {
             cancel = true;
@@ -71,8 +91,8 @@ function prepareForSearch() {
               if(record.length != itemsIndexFieldsLength ||
                  !record[itemsIndexFields.short_title]) // skip invalid
                 continue;
-              itemsByShortTitle[record[itemsIndexFields.short_title]] = record;
-              itemsByProjectUrl[record[itemsIndexFields.project_url]] = record;
+              rowsByShortTitle[record[itemsIndexFields.short_title]] = record;
+              rowsByProjectUrl[record[itemsIndexFields.project_url]] = record;
             }
           });
           parser.on('end', () => {
@@ -92,24 +112,30 @@ function prepareForSearch() {
   }
 }
 
+function itemFromRow(row) {
+  if(!row)
+    return null
+  return _.fromPairs(
+    itemsIndexFieldKeys.map((f) => [ f, row[itemsIndexFields[f]] ])
+  )
+}
+
 exports.searchByShortTitle = function(short_title) {
   return prepareForSearch()
-    .then(() => itemsByShortTitle[short_title]);
+    .then(() => itemFromRow(rowsByShortTitle[short_title]));
 }
 
 exports.searchByProjectUrl = function(project_url) {
   return prepareForSearch()
-    .then(() => itemsByProjectUrl[project_url]);
+    .then(() => itemFromRow(rowsByProjectUrl[project_url]));
 }
 
 exports.searchForItem = function(input) {
   return prepareForSearch()
     .then(() => {
-      let tmp = input.short_title ?
-                   itemsByShortTitle[input.short_title] : null;
+      let tmp = input.short_title ? rowsByShortTitle[input.short_title] : null;
       if(!tmp)
-        tmp = input.project_url ?
-                   itemsByProjectUrl[input.project_url] : null;
-      return tmp;
+        tmp = input.project_url ? rowsByProjectUrl[input.project_url] : null;
+      return itemFromRow(tmp)
     });
 }

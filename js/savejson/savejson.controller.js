@@ -92,6 +92,10 @@ exports.saveJSON = function(req, res) {
                        req.headers['x-forwarded-for'] :
                        req.connection.remoteAddress);
 
+  // FOR DEVELOPMENT
+  // skip recaptcha
+  // return step1();
+  
   var recaptcha_resp = _json['g-recaptcha-response'];
   if(!recaptcha_resp)
     return res.json({ error: "No recaptcha response!" });
@@ -209,7 +213,10 @@ exports.saveJSON = function(req, res) {
       })
       .then(() => { // final step
         return contentCreator.itemChangeQueue(() => { // on green
-          let indexStream = items_index.performChangesDuplex([json]);
+          let indexStream = items_index.performChangesTransform([ {
+            item: json,
+            task: 'upsert'
+          } ]);
           // TODO:: modify to stream mode, no full buffer
           contentCreator.readFromGithub(items_index.filePath)
             .then((data) => {
@@ -243,7 +250,7 @@ exports.saveJSON = function(req, res) {
         return res.json({success: json.short_title});
       })
       .catch((err) => {
-        res.json({error: "Internal error!\n"+(err.stack||err)});
+        res.json({error: "Internal error!"});
         if (err)
           console.error(err);
       });
