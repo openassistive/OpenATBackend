@@ -92,7 +92,8 @@ function prepareForSearch() {
                  !record[itemsIndexFields.short_title]) // skip invalid
                 continue;
               rowsByShortTitle[record[itemsIndexFields.short_title]] = record;
-              rowsByProjectUrl[record[itemsIndexFields.project_url]] = record;
+              if(record[itemsIndexFields.project_url])
+                rowsByProjectUrl[record[itemsIndexFields.project_url]]= record;
             }
           });
           parser.on('end', () => {

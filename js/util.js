@@ -40,5 +40,14 @@ module.exports = {
       ':' + prefixFixedString(d.getUTCMinutes(), '0', 2) +
       ':' + prefixFixedString(d.getUTCSeconds(), '0', 2) +
         'Z';
+  },
+  random_str: (n, chars) => {
+    var ret = "",
+        charsn = chars.length;
+    while(n > 0) {
+      ret += chars[Math.floor(Math.random() * charsn)]
+      n--;
+    }
+    return ret;
   }
 };

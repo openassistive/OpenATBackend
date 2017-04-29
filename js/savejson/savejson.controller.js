@@ -85,7 +85,8 @@ exports.saveJSON = function(req, res) {
     return res.sendStatus(400);
   }
   
-  var itemFn,
+  var authorized = false,
+      itemFn,
       _json = req.body,
       json = _.assign({}, _json),
       relayed_by_ip = (req.headers['x-forwarded-for'] ?
@@ -146,19 +147,20 @@ exports.saveJSON = function(req, res) {
           else
             delete json[prop];
         }
-        save();
+        step2();
       })
       .catch((err) => {
         if(err.status != 404 && err.message != 'File not found') {
           console.error(`Error on readItemFromGithub(${itemFn})`);
           console.error(err); // log for debugging
         }
-        save();
+        step2();
       });
   }
   
-  function save() {
-
+  function step2() {
+    let promises = [];
+    
     // set initial value on null
     if(!json.date) // current time
       json.date = util.dateISOString(new Date());
@@ -167,14 +169,54 @@ exports.saveJSON = function(req, res) {
     for(let f of ['tags','categories'])
       if(!Array.isArray(json[f]))
         json[f] = [];
-    
-    // on save set as un-moderated (no matter what is the input)
-    json.moderated = false;
-    json.tags.push("un-moderated");
 
     // set remoteip
     json.relayed_by_ip = relayed_by_ip;
 
+   
+    if(!authorized) {
+      // on save set as un-moderated (no matter what is the input)
+      json.moderated = false;
+      json.tags.push("un-moderated");
+
+      // select a un-occupied short_title and not the short_title
+      promises.push(try_select_unmoderated_short_title(5))
+    }
+
+    Promise.all(promises)
+      .then(save)
+      .catch((err) => { // un-expected error, kill the connection
+        res.json({error: "Internal error!"});
+        if (err)
+          console.error(err);
+      });
+  }
+  function try_select_unmoderated_short_title(try_len) {
+    if(try_len == 0) {
+      throw new Error("Failed attempt to select unmoderated short_title");
+    }
+    // change itemFn as well
+    let suffix = util.random_str(3, "abcdefghijklmnopqrstuvwxyz0123456789");
+    itemFn = `content/item/${json.short_title}-${suffix}.md`;
+    return contentCreator.readFromGithub(itemFn)
+      .then((resp) => {
+        // try again
+        return try_select_unmoderated_short_title(try_len - 1);
+      })
+      .catch((err) => {
+        if(err.status != 404 && err.message != 'File not found') {
+          console.error(`Error on readFromGithub(${itemFn})`);
+          throw err;
+        } else {
+          // success
+          json.moderated_short_title = json.short_title;
+          json.short_title = `${json.short_title}-${suffix}`;
+        }
+      });    
+  }
+
+  function save() {
+    
     if(_json.dryrun) {
       return res.json({ "savedata": json });
     }
@@ -184,6 +226,8 @@ exports.saveJSON = function(req, res) {
     contentCreator.downloadFileToBuffer(json.image_download)
       .then(function(imagedata) {
         var sha = crypto.createHash('sha256').update(imagedata).digest().toString('hex');
+        // even for un-moderated items sha check will be ok
+        // since the data is from readonly data of moderated item
         if(json.image_download_sha != sha) { // add images
           json.image_download_sha = sha;
           return contentCreator.createItemImages(imagedata)
@@ -206,43 +250,46 @@ exports.saveJSON = function(req, res) {
                   encoding: 'base64',
                   path: images_dir + name
                 });
-                json.thumb = images_site_path + name
+                json.image = images_site_path + name
               }
             })
         }
       })
       .then(() => { // final step
         return contentCreator.itemChangeQueue(() => { // on green
-          let indexStream = items_index.performChangesTransform([ {
-            item: json,
-            task: 'upsert'
-          } ]);
-          // TODO:: modify to stream mode, no full buffer
-          contentCreator.readFromGithub(items_index.filePath)
-            .then((data) => {
-              indexStream.write(data);
-              indexStream.end();
-            })
-            .catch((err) => {
-              if(err.status != 404 && err.message != 'File not found') {
-                indexStream.emit('error', err);
-              }
-              indexStream.end();
-            });
-          changes = changes.concat([
-            {
+          // Changing items_index is disabled
+          // There's no need for it when adding un-moderated items
+          // uless the request is from authorized user
+          if(authorized) {
+            let indexStream = items_index.performChangesTransform([ {
+              item: json,
+              task: 'upsert'
+            } ]);
+            // TODO:: modify to stream mode, no full buffer
+            contentCreator.readFromGithub(items_index.filePath)
+              .then((data) => {
+                indexStream.write(data);
+                indexStream.end();
+              })
+              .catch((err) => {
+                if(err.status != 404 && err.message != 'File not found') {
+                  indexStream.emit('error', err);
+                }
+                indexStream.end();
+              });
+            changes.push({
               stream: indexStream,
               path: items_index.filePath
-            },
-            {
-              content: contentCreator.generateMDFile(json),
-              encoding: 'utf-8',
-              path: itemFn
-            }
-          ]);
-          return contentCreator
-            .commitChangesToGithub('master', `Update item ${json.short_title}`,
-                                   changes);
+            });
+          }
+          changes.push({
+            content: contentCreator.generateMDFile(json),
+            encoding: 'utf-8',
+            path: itemFn
+          });
+          let msg = authorized ? `Save item ${json.short_title}` :
+              `Add un-moderated item ${json.short_title}`;
+          return contentCreator.commitChangesToGithub('master',msg, changes);
         });
       })
       .then(() => {
