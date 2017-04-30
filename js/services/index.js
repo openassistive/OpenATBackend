@@ -50,10 +50,15 @@ var allServices = module.exports.allServices = [
       skip: 0,
       take: 1
     }
+  },
+  {
+    name: 'httpfile' // input url is required
   }
 ];
 
 var getProjectUrl = function(service, path) {
+  if(!service.baseUrl)
+    throw new Error('url is required for this ')
   var resolved = url.resolve(service.baseUrl, path);
   var parsed = url.parse(resolved);
 
@@ -117,8 +122,18 @@ var createServiceRouter = function(service) {
   var handler = require('./' + service.name).handler;
 
   router.get('/', function(req, res) {
-    req.projectUrl = getProjectUrl(service, req.query.id);
-    req.repoPath = url.parse(req.projectUrl).pathname;
+    if(req.query.url) { // url has priority
+      req.projectUrl = req.query.url;
+      req.projectUrlParsed = url.parse(req.projectUrl);
+      if(['http:','https:'].indexOf(req.projectUrlParsed.protocol) == -1 ||
+         !req.projectUrlParsed.host)
+        return res.json({ error: 'invalid input url' });
+    } else {
+      if(!service.baseUrl)
+        return res.json({ error: 'url is required for this service' });
+      req.projectUrl = getProjectUrl(service, req.query.id);
+      req.repoPath = url.parse(req.projectUrl).pathname;
+    }
     handler(req, res, returnHandler.bind(service));
   });
 

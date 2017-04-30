@@ -62,8 +62,7 @@ const saveValidator = schema(Object.assign(
   ),
   _.fromPairs(
     [ 'tags', 'categories' ]
-      .map((n) => { // required string
-        // main_description should get sanitized after this validation
+      .map((n) => { // required array of string
         return [ n, {
           use: [ function(value) {
             if(value == null)
@@ -99,7 +98,7 @@ exports.saveJSON = function(req, res) {
   
   var recaptcha_resp = _json['g-recaptcha-response'];
   if(!recaptcha_resp)
-    return res.json({ error: "No recaptcha response!" });
+    return res.status(422).json({ error: "No recaptcha response!" });
   request.post("https://www.google.com/recaptcha/api/siteverify", {
     form: {
       secret: process.env.RecaptchaSecret,
@@ -118,7 +117,7 @@ exports.saveJSON = function(req, res) {
       else
         throw new Error("Invalid response");
     } catch(err) {
-      res.json({ error: "Recaptcha error: " + (err?err.message||err:'undefined') });
+      res.status(422).json({ error: "Recaptcha error: " + (err?err.message||err:'undefined') });
     }
   })
   
@@ -126,7 +125,7 @@ exports.saveJSON = function(req, res) {
     var errors = saveValidator.validate(json)
 
     if(errors.length > 0) {
-      return res.json({ error: errors[0].message });
+      return res.status(422).json({ error: errors[0].message });
     }
 
     // prevent abuse with html tags, <script injection>
@@ -186,7 +185,7 @@ exports.saveJSON = function(req, res) {
     Promise.all(promises)
       .then(save)
       .catch((err) => { // un-expected error, kill the connection
-        res.json({error: "Internal error!"});
+        res.status(422).json({error: "Internal error!"});
         if (err)
           console.error(err);
       });
@@ -297,7 +296,7 @@ exports.saveJSON = function(req, res) {
         return res.json({success: json.short_title});
       })
       .catch((err) => {
-        res.json({error: "Internal error!"});
+        res.status(500).json({error: "Internal error!"});
         if (err)
           console.error(err);
       });
