@@ -77,50 +77,64 @@ const dataValidator = schema(Object.assign(
 ));
 
 exports.handler = function(req, res, next) {
-
-  // with initial content validation
+  // a helper for other services to get access for download requests
+  let urldlf = req.url_dl_filter || function (s) { return s; };
+  let ourl = urldlf(req.projectUrl)
   
-  request({url: req.projectUrl, encoding: 'utf8'}, function(err, resp, body) {
+  request({url: ourl, encoding: 'utf8'}, function(err, resp, body) {
     if(err) {
       res.status(422).json({ error: "Could not open requested url" })
+    } else {
+      try {
+        // parse item
+        let item = util.parseItem(body);
+        exports.handler_step2(item, req, res, next);
+      } catch(err) {
+        res.status(422).json({ error: "Content has invalid format" })
+        return;
+      }
     }
-    var item, data, tmp;
-    try {
-      // parse data
-      item = util.parseItem(body);
-      data = Object.assign({}, item.fm, {
-        main_description: item.content
-      });
-    } catch(err) {
-      res.status(422).json({ error: "Content has invalid format" })
-      return;
-    }
-
-    // validate
-    let errors = dataValidator.validate(data);
-    if(errors.length > 0) {
-      return res.status(422).json({ error: errors[0].message });
-    }
-
-    // make it ready for save
-    // short_title from title
-    data.short_title = contentCreator.genShortTitle(data.title);
-    
-    data.original_url = req.projectUrl;
-    
-    [ 'categories', 'tags' ].forEach((name) => {
-      if(!Array.isArray(data[name]))
-        data[name] = [];
-    });
-
-    if(data.image) {
-      data.image_download =
-        url.resolve(req.projectResolveUrl || req.projectUrl, data.image)
-      delete data.image
-    }
-
-    // success
-    res.json(data);
   });
+}
+
+exports.handler_step2 = function(item, req, res, next) {
+
+  // a helper for other services to get access for download requests
+  let urldlf = req.url_dl_filter || function (s) { return s; };
+  let ourl = urldlf(req.projectUrl)
   
-};
+  // with initial content validation
+
+  let data = Object.assign({}, item.fm, {
+    main_description: item.content
+  });
+
+  // validate
+  let errors = dataValidator.validate(data);
+  if(errors.length > 0) {
+    return res.status(422).json({ error: errors[0].message });
+  }
+
+  // make it ready for save
+  // short_title from title
+  data.short_title = contentCreator.genShortTitle(data.title);
+  
+  data.original_url = req.originalUrl || req.projectUrl;
+  
+  [ 'categories', 'tags' ].forEach((name) => {
+    if(!Array.isArray(data[name]))
+      data[name] = [];
+  });
+
+  if(data.image) {
+    data.image_download = 
+      url.resolve(req.projectResolveUrl || req.projectUrl, data.image);
+    delete data.image;
+  }
+
+  if(data.image_download)
+    data.image_download = urldlf(data.image_download)
+
+  // success
+  res.json(data);
+}

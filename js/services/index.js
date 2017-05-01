@@ -53,6 +53,14 @@ var allServices = module.exports.allServices = [
   },
   {
     name: 'httpfile' // input url is required
+  },
+  {
+    name: 'dropbox',
+    baseUrl: 'https://www.dropbox.com/',
+    prefix: 'sh/',
+    projectPath: {
+      skip: 0 // take the rest
+    }
   }
 ];
 
@@ -65,7 +73,9 @@ var getProjectUrl = function(service, path) {
   var pathname = parsed
     .path
     .split('/')
-    .slice(service.projectPath.skip+1, service.projectPath.take+1)
+    .slice(service.projectPath.skip+1,
+           (service.projectPath.take!==undefined ? service.projectPath.take+1 :
+            undefined))
     .map(encodeURIComponent)
     .join('/');
 
