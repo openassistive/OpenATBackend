@@ -232,7 +232,7 @@ exports.saveJSON = function(req, res) {
           return contentCreator.createItemImages(imagedata)
             .then(function(resp) { // response has png images
               var images_dir = 'static/items/',
-                  images_site_path = 'images/'
+                  images_site_path = 'items/'
               if(resp.thumb) {
                 var name = json.short_title + '-thumb.png';
                 changes.push({
