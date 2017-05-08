@@ -231,7 +231,7 @@ exports.saveJSON = function(req, res) {
           json.image_download_sha = sha;
           return contentCreator.createItemImages(imagedata)
             .then(function(resp) { // response has png images
-              var images_dir = 'static/files/images/',
+              var images_dir = 'static/items/',
                   images_site_path = 'images/'
               if(resp.thumb) {
                 var name = json.short_title + '-thumb.png';
