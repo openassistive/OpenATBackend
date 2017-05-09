@@ -48,8 +48,8 @@ exports.handler = function(req, res, next) {
           datemod = new Date();
         result.datemod = util.dateISOString(datemod);
         result.project_url =  url;
-        result.description = toMarkdown(pinshape_JSON.description.substring(7,180));
-        result.main_description  = toMarkdown(pinshape_JSON.description.substring(7));
+        result.description = toMarkdown(pinshape_JSON.description.substring(5,180));
+        result.main_description  = toMarkdown(pinshape_JSON.description.substring(5));
         result.original_url =  url;
       })
 
