@@ -6,7 +6,7 @@ const util = require('../util')
 
 exports.handler = function(req, res, next) {
   var url = req.projectUrl;
-
+  
   scraperjs.StaticScraper.create(url)
     .scrape(function($) {
 
@@ -58,7 +58,7 @@ exports.handler = function(req, res, next) {
 
       result.download_url = 'http://www.thingiverse.com'+$('a.thing-download-btn').attr('href');
 
-      $("meta[name=description]").filter(function() {
+      $("meta[name=description]").each(function() {
         result.description = $(this).attr('content');
       });
 
@@ -71,10 +71,12 @@ exports.handler = function(req, res, next) {
         result.image_download = img_url[0].attribs['data-cfsrc'];
       }
 
-      $("div.description").filter(function() {
+      $("#description").each(function() {
         var data = $(this);
         result.main_description = toMarkdown(data.html());
       });
+      if(!result.main_description) // no description found
+        result.main_description = result.description;
 
       for (var index in result) {
          if (!result[index] || /^\s*$/.test(result[index])) {

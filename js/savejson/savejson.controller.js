@@ -90,11 +90,13 @@ exports.saveJSON = function(req, res) {
       json = _.assign({}, _json),
       relayed_by_ip = (req.headers['x-forwarded-for'] ?
                        req.headers['x-forwarded-for'] :
-                       req.connection.remoteAddress);
+                       req.connection.remoteAddress),
+      short_title, originalItem, originalItemFn;
 
   // FOR DEVELOPMENT
   // skip recaptcha
-  // return step1();
+  if(!!process.env.TEST_MODE)
+    return step1();
   
   var recaptcha_resp = _json['g-recaptcha-response'];
   if(!recaptcha_resp)
@@ -133,8 +135,10 @@ exports.saveJSON = function(req, res) {
 
     // convert dates
     json.datemod = util.dateISOString(Date.parse(json.datemod))
-
-    itemFn = 'content/item/'+json.short_title + '.md';
+    
+    short_title = json.short_title
+    
+    originalItemFn = itemFn = 'content/item/' + json.short_title + '.md';
 
     // assuming `date' is readonly, It's the save time if overwriting then
     // get date from existing file
@@ -146,14 +150,31 @@ exports.saveJSON = function(req, res) {
           else
             delete json[prop];
         }
-        step2();
+        originalItem = resp;
       })
       .catch((err) => {
         if(err.status != 404 && err.message != 'File not found') {
           console.error(`Error on readItemFromGithub(${itemFn})`);
           console.error(err); // log for debugging
         }
-        step2();
+      })
+      .then(() => {
+        if(!authorized) {
+          items_index.searchForItem(json)
+            .then((itemIndex) => {
+              if(itemIndex && itemIndex.unmoderated.length > 0) {
+                return res.status(422).json({ error: "The project has an un-moderated item in queue, You can submit new change after It's processed" });
+              } else {
+                step2();
+              }
+            })
+            .catch((err) => {
+              console.error("items_index.searchForItem error: ", err);
+              res.status(500).json({ error: "Internal error" });
+            });
+        } else {
+          step2();
+        }
       });
   }
   
@@ -171,7 +192,6 @@ exports.saveJSON = function(req, res) {
 
     // set remoteip
     json.relayed_by_ip = relayed_by_ip;
-
    
     if(!authorized) {
       // on save set as un-moderated (no matter what is the input)
@@ -179,7 +199,7 @@ exports.saveJSON = function(req, res) {
       json.tags.push("un-moderated");
 
       // select a un-occupied short_title and not the short_title
-      promises.push(try_select_unmoderated_short_title(5))
+      promises.push(try_select_unmoderated_short_title(5));
     }
 
     Promise.all(promises)
@@ -215,7 +235,6 @@ exports.saveJSON = function(req, res) {
   }
 
   function save() {
-    
     if(_json.dryrun) {
       return res.json({ "savedata": json });
     }
@@ -256,39 +275,53 @@ exports.saveJSON = function(req, res) {
       })
       .then(() => { // final step
         return contentCreator.itemChangeQueue(() => { // on green
-          // Changing items_index is disabled
-          // There's no need for it when adding un-moderated items
-          // uless the request is from authorized user
-          if(authorized) {
-            let indexStream = items_index.performChangesTransform([ {
-              item: json,
-              task: 'upsert'
-            } ]);
-            // TODO:: modify to stream mode, no full buffer
-            contentCreator.readFromGithub(items_index.filePath)
-              .then((data) => {
-                indexStream.write(data);
-                indexStream.end();
-              })
-              .catch((err) => {
-                if(err.status != 404 && err.message != 'File not found') {
-                  indexStream.emit('error', err);
-                }
-                indexStream.end();
+          return items_index.searchForItem({
+            short_title: short_title,
+            project_url: json.project_url
+          })
+            .then((foundItemIndex) => {
+              // Changing items_index is disabled
+              // There's no need for it when adding un-moderated items
+              // uless the request is from authorized user
+              let unmoderated = foundItemIndex ? foundItemIndex.unmoderated : [];
+              let indexChanges = [ {
+                item: {
+                  short_title: short_title,
+                  project_url: json.project_url,
+                  exists: foundItemIndex ? foundItemIndex.exists : false,
+                  unmoderated: authorized ? unmoderated : unmoderated.concat([json.short_title])
+                },
+                task: 'upsert'
+              } ];
+              let indexStream = items_index.performChangesTransform(indexChanges);
+              // TODO:: modify to stream mode, no full buffer
+              contentCreator.readFromGithub(items_index.filePath)
+                .then((data) => {
+                  indexStream.write(data);
+                  indexStream.end();
+                })
+                .catch((err) => {
+                  if(err.status != 404 && err.message != 'File not found') {
+                    indexStream.emit('error', err);
+                  }
+                  indexStream.end();
+                });
+              changes.push({
+                stream: indexStream,
+                path: items_index.filePath
               });
-            changes.push({
-              stream: indexStream,
-              path: items_index.filePath
+              changes.push({
+                content: contentCreator.generateMDFile(json),
+                encoding: 'utf-8',
+                path: itemFn
+              });
+              let msg = authorized ? `Save item ${json.short_title}` :
+                  `Add un-moderated item ${json.short_title}`;
+              return contentCreator.commitChangesToGithub(!!process.env.TEST_MODE ? 'test' : 'master', msg, changes)
+                .then(() => {
+                  return items_index.updateMemPool(indexChanges);
+                });
             });
-          }
-          changes.push({
-            content: contentCreator.generateMDFile(json),
-            encoding: 'utf-8',
-            path: itemFn
-          });
-          let msg = authorized ? `Save item ${json.short_title}` :
-              `Add un-moderated item ${json.short_title}`;
-          return contentCreator.commitChangesToGithub('master',msg, changes);
         });
       })
       .then(() => {

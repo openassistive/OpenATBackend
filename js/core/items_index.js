@@ -11,25 +11,39 @@ exports.updateEvery = 1 * 60 * 1000;
  */
 const itemsIndexFields = {
   short_title: 0,
-  project_url: 1
+  project_url: 1,
+  exists: 2,
+  unmoderated: 3
+};
+const itemsIndexFieldsEncode = {
+  exists: (v) => v ? "1" : "0",
+  unmoderated: (v) => JSON.stringify(v)
+};
+const itemsIndexFieldsDecode = {
+  exists: (v) => v == "1",
+  unmoderated: (v) => v ? JSON.parse(v) : []
 };
 const itemsIndexFieldKeys = Object.keys(itemsIndexFields);
 const itemsIndexFieldsLength = itemsIndexFieldKeys.length;
+
+function mkrow(item) {
+  let row = [];
+  for(let field in itemsIndexFields) {
+    if(!(field in item))
+      throw new Error(`Cannot index item \`${field}\` does not exists`);
+    let v = item[field];
+    if(itemsIndexFieldsEncode[field])
+      v = itemsIndexFieldsEncode[field](v);
+    row[itemsIndexFields[field]] = v;
+  }
+  return row;
+}
 
 /** @brief modify items_index.csv content
  *  @param items changes to perform (short_title is the identifier)
  *  @return transform stream
  */
-exports.performChangesTransform = function(changes) {
-  function mkrow(item) {
-    let row = [];
-    for(let field in itemsIndexFields) {
-      if(!(field in item))
-        throw new Error(`Cannot index item \`${field}\` does not exists`);
-      row[itemsIndexFields[field]] = item[field];
-    }
-    return row;
-  }
+exports.performChangesTransform = function(changes, cmp) {
   changes = changes.concat();
   let editcsv = csv.transform((record) => {
     // validate
@@ -39,16 +53,17 @@ exports.performChangesTransform = function(changes) {
       return null;
     } else {
       let short_title = record[itemsIndexFields.short_title];
-      let idx = changes.findIndex((c) => c.item.short_title == short_title);
+      let project_url = record[itemsIndexFields.project_url];
+      let idx = changes.findIndex((c) => c.item.short_title == short_title ||
+                                         c.item.project_url == project_url);
       if(idx != -1) {
         let change = changes.splice(idx, 1)[0];
         if(change.task == 'upsert')
           return mkrow(change.item); // replace
         else if(change.task == 'delete')
           return null;
-        else
-          return record;
       }
+      return record;
     }
     return null;
   })
@@ -71,10 +86,14 @@ exports.performChangesTransform = function(changes) {
  */
 let lastUpdate = 0, // zero means no data
     rowsByShortTitle = {},
-    rowsByProjectUrl = {};
+    rowsByProjectUrl = {},
+    prepareForSearchPromise;
 function prepareForSearch() {
+  if(prepareForSearchPromise)
+    return prepareForSearchPromise;
   if(new Date().getTime() - exports.updateEvery > lastUpdate) {
-    return contentCreator.readFromGithub(exports.filePath)
+    return prepareForSearchPromise =
+      contentCreator.readFromGithub(exports.filePath)
       .then((data) => {
         return new Promise((resolve, reject) => {
           rowsByShortTitle = {};
@@ -83,6 +102,7 @@ function prepareForSearch() {
               cancel = false;
           parser.on('error', (err) => {
             cancel = true;
+            delete prepareForSearchPromise;
             reject(err);
           });
           parser.on('readable', () => {
@@ -97,14 +117,18 @@ function prepareForSearch() {
             }
           });
           parser.on('end', () => {
-            if(!cancel)
+            if(!cancel) {
+              lastUpdate = new Date().getTime()
+              delete prepareForSearchPromise;
               resolve();
+            }
           });
           parser.write(data);
           parser.end();
         });
       })
       .catch((err) => { // skip not found
+        delete prepareForSearchPromise;
         if(err.status != 404 && err.message != 'File not found')
           throw err;
       });
@@ -116,9 +140,38 @@ function prepareForSearch() {
 function itemFromRow(row) {
   if(!row)
     return null
-  return _.fromPairs(
-    itemsIndexFieldKeys.map((f) => [ f, row[itemsIndexFields[f]] ])
-  )
+  if(!row._parsed)
+    row._parsed = _.fromPairs(
+      itemsIndexFieldKeys.map(
+        (f) => [ f,
+                 itemsIndexFieldsDecode[f] ?
+                   itemsIndexFieldsDecode[f](row[itemsIndexFields[f]]) :
+                   row[itemsIndexFields[f]] ]
+      )
+    );
+  return row._parsed;
+}
+
+exports.updateMemPool = function(changes) {
+  return prepareForSearch()
+    .then(() => {
+      for(let change of changes) {
+        let item = change.item;
+        if(change.task == 'upsert') {
+          let record = mkrow(item)
+          record._parsed = item;
+          if(item.short_title)
+            rowsByShortTitle[item.short_title] = record;
+          if(item.project_url)
+            rowsByProjectUrl[item.project_url] = record;
+        } else if(change.task == 'delete') {
+          if(item.short_title)
+            delete rowsByShortTitle[item.short_title];
+          if(item.project_url)
+            delete rowsByProjectUrl[item.project_url];
+        }
+      }
+    });
 }
 
 exports.searchByShortTitle = function(short_title) {

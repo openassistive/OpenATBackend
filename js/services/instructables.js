@@ -62,16 +62,12 @@ exports.handler = function(req, res, next) {
 
       result.download_url = 'http://www.instructables.com'+$('div.pull-left a#download-pdf-btn-top').attr('data-return-url');
 
-      $("meta[name=description]").filter(function() {
+      $("meta[name=description]").each(function() {
         var data = $(this);
-        result.main_description = data.attr('content');
+        result.description = result.main_description = data.attr('content');
       });
 
       result.image_download = ($("div.photoset-image img").first() || $('img').first()).attr("src");
-
-      $("p.description").filter(function() {
-        result.description = $(this).text();
-      });
       
       for (var index in result) {
          if (!result[index] || /^\s*$/.test(result[index])) {

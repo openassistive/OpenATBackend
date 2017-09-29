@@ -67,9 +67,10 @@ var allServices = module.exports.allServices = [
 var getProjectUrl = function(service, path) {
   if(!service.baseUrl)
     throw new Error('url is required for this ')
-  var resolved = url.resolve(service.baseUrl, path);
+  // prefix path with slash
+  var resolved = url.resolve(service.baseUrl, (path[0] != "/" ? "/" : "") + path);
   var parsed = url.parse(resolved);
-
+  
   var pathname = parsed
     .path
     .split('/')
@@ -92,11 +93,14 @@ function baseParamsMiddleWare(service, req, resp) {
   if(req.result.short_title) {
     promises.push(
       items_index.searchForItem(req.result)
-        .then((found) => {
-          if(found) {
-            req.result.exists = true;
-            // simple relative url
-            req.result.current_url = "/item/" + found.short_title;
+        .then((itemIndex) => {
+          if(itemIndex && itemIndex) {
+            req.result.exists = itemIndex.exists;
+            if(req.result.exists) {
+              // simple relative url
+              req.result.current_url = "/item/" + itemIndex.short_title;
+            }
+            req.result.has_unmoderated = itemIndex.unmoderated.length > 0;
           } else {
             req.result.exists = false;
           }
