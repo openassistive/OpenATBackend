@@ -190,6 +190,8 @@ exports.downloadFileToBufferDefaultOptions = {
  * @return promise of content buffer
  */
 exports.downloadFileToBuffer = function(url, options) {
+  if(url == null)
+    throw new Error("url should be a valid value");
   if(options === undefined)
     options = exports.downloadFileToBufferDefaultOptions;
   return new Promise((resolve, reject) => {

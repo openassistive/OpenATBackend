@@ -240,8 +240,9 @@ exports.saveJSON = function(req, res) {
     }
 
     var changes = [];
-    
-    contentCreator.downloadFileToBuffer(json.image_download)
+
+    (json.image_download ? 
+     contentCreator.downloadFileToBuffer(json.image_download)
       .then(function(imagedata) {
         var sha = crypto.createHash('sha256').update(imagedata).digest().toString('hex');
         // even for un-moderated items sha check will be ok
@@ -272,7 +273,7 @@ exports.saveJSON = function(req, res) {
               }
             })
         }
-      })
+      }) : Promise.resolve())
       .then(() => { // final step
         return contentCreator.itemChangeQueue(() => { // on green
           return items_index.searchForItem({
