@@ -140,9 +140,9 @@ definitions:
       main_description:
         type: "string"
       tags:
-        type: "array of string"
+        type: "array"
       categories:
-        type: "array of string"
+        type: "array"
     example:
       short_title: "sawat"
       title: "SAW - Special Access to Windows"
