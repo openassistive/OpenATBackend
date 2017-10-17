@@ -53,6 +53,7 @@
         dom_id: "swagger-ui-container",
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
         onComplete: function(swaggerApi, swaggerUi){
+          /*
           if(typeof initOAuth == "function") {
             initOAuth({
               clientId: "your-client-id",
@@ -63,7 +64,7 @@
               additionalQueryStringParams: {}
             });
           }
-
+          */
           if(window.SwaggerTranslator) {
             window.SwaggerTranslator.translate();
           }

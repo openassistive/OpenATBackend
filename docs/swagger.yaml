@@ -21,15 +21,18 @@ schemes:
  - http
  - https
 tags:
-- name: "scraper service"
-  description: "Get a project information"
+- name: "Project IO"
+  description: "OpenAssistive Editing Toolkit"
 paths:
   /service/{service}/project:
     get:
       tags:
-      - "scraper service"
+      - "Project IO"
       summary: "Retrieves meta-data information for a project"
-      description:  "Scrapes for a project page to get important meta-data information."
+      description:  |-
+        Scrapes for a project page to get important meta-data information.
+        
+        `id` or `url` is required and `url` has precedence.
       operationId: "scrapeProject"
       produces:
       - "application/json"
@@ -45,16 +48,24 @@ paths:
         - "pinshape"
         - "sourceforge"
         - "thingiverse"
+        - "dropbox"
+        - "httpfile"
       - name: "id"
         in: "query"
         description: |-
-          The identification of the project page in the selected service.
+          The identifier of the project page in the selected service.
           * github: username/projectname
-          * instructables: identification
-          * pinshape: identification
+          * instructables: identifier
+          * pinshape: identifier
           * sourceforge: projectname
-          * thingiverse: thing:id
-        required: true
+          * thingiverse: thing:id `OR` id
+          * dropbox: path
+          * httpfile: None
+        type: "string"
+      - name: "url"
+        in: "query"
+        description: |-
+          Complete url of project url, `httpfile` requires url to operate.
         type: "string"
       responses:
         200:
@@ -63,9 +74,12 @@ paths:
             $ref: "#/definitions/Project"
         400:
           description: "Project not found"
-
-  /project/save:
+        422:
+          description: "Invalid input or could not process, reason provided"
+  /project/save:  
     post:
+      tags:
+      - "Project IO"
       summary: "Save project meta-data for the front-end"
       description: "Save project meta-data for the front-end"
       operationId: "saveProject"
@@ -85,16 +99,27 @@ paths:
           description: "Successful operation"
         400:
           description: "Invalid project path"
+        422:
+          description: "Invalid input or could not process, reason provided"
 
 definitions:
   Project:
     type: "object"
     required:
     - "title"
+    - "authors"
+    - "short_title"
+    - "datemod"
+    - "project_url"
+    - "original_url"
+    - "description"
+    - "main_description"
+    - "tags"
+    - "categories"
     properties:
-      title:
+      short_title:
         type: "string"
-      type:
+      title:
         type: "string"
       datemod:
         type: "string"
@@ -106,18 +131,21 @@ definitions:
         type: "string"
       project_url:
         type: "string"
-      description:
-        type: "string"
-      image:
+      image_download:
         type: "string"
       original_url:
         type: "string"
-      thumb:
+      description:
         type: "string"
+      main_description:
+        type: "string"
+      tags:
+        type: "array of string"
+      categories:
+        type: "array of string"
     example:
       short_title: "sawat"
       title: "SAW - Special Access to Windows"
-      type: "software"
       authors: "mlundalv, stuartaw, walsh_jc"
       license: "GNU General Public License version 3.0 (GPLv3)"
       datemod: "2016-10-22 00:00"
@@ -139,6 +167,8 @@ definitions:
         ([http://conceptcoding.org/](http://conceptcoding.org/)), and adds several
         other feautures to make creating interfaces easy for those who use alternative
         inputs.
-      image: "images/full/saw"
-      thumb: "images/thumb/saw"
       original_url: "https://github.com/alandmoore/wcgbrowser"
+      categories:
+        - "Software"
+      tags:
+        - alternative-access
