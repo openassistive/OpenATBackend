@@ -6,8 +6,8 @@ const scraperjs = require('scraperjs')
 const httpfile = require('./httpfile')
 
 exports.handler = function(req, res, next) {
-
-  let pttrn01 = new RegExp("https?:\\/\\/(www\\.)dropbox\\.com\\/sh\\/[^\\?\\s]+(\\?dl=[01])?$");
+  
+  let pttrn01 = new RegExp("https?:\\/\\/(www\\.)dropbox\\.com\\/[^\\?\\s]+(\\?dl=[01])?$");
   function url_dl_filter(s, dl) { // add dl when it's needed for downloading
     if(dl == null)
       dl = 1;
@@ -18,7 +18,7 @@ exports.handler = function(req, res, next) {
   }
 
   req.url_dl_filter = url_dl_filter; // httpfile input dl filter
-  
+
   // quick solution, if input is the .md file then delegate to httpfile
   if(req.projectUrl.endsWith('.md')) {
     httpfile.handler(req, res, next)

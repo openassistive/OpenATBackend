@@ -57,7 +57,7 @@ var allServices = module.exports.allServices = [
   {
     name: 'dropbox',
     baseUrl: 'https://www.dropbox.com/',
-    prefix: 'sh/',
+    prefix: '',
     projectPath: {
       skip: 0 // take the rest
     }
