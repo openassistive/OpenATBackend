@@ -141,8 +141,12 @@ definitions:
         type: "string"
       tags:
         type: "array"
+        items:
+          type: "string"
       categories:
         type: "array"
+        items:
+          type: "string"
     example:
       short_title: "sawat"
       title: "SAW - Special Access to Windows"
