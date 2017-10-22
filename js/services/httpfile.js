@@ -119,7 +119,8 @@ exports.handler_step2 = function(item, req, res, next) {
   // short_title from title
   data.short_title = contentCreator.genShortTitle(data.title);
   
-  data.original_url = req.originalUrl || req.projectUrl;
+  if(!data.original_url)
+    data.original_url = req.projectUrl;
   
   [ 'categories', 'tags' ].forEach((name) => {
     if(!Array.isArray(data[name]))

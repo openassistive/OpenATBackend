@@ -4,6 +4,7 @@ const util = require('../util')
 const contentCreator = require('../functions')
 const scraperjs = require('scraperjs')
 const httpfile = require('./httpfile')
+const url = require('url')
 
 exports.handler = function(req, res, next) {
   
@@ -23,13 +24,14 @@ exports.handler = function(req, res, next) {
   if(req.projectUrl.endsWith('.md')) {
     httpfile.handler(req, res, next)
   } else {
-    scraperjs.StaticScraper.create(url_dl_filter(req.projectUrl, 0))
+    var pageUrl = url_dl_filter(req.projectUrl, 0);
+    scraperjs.StaticScraper.create(pageUrl)
       .scrape(function($) {
         let files = [];
         $('.sl-link--file').each(function() {
           var $el = $(this),
               filename = $el.find('.sl-grid-filename').text(),
-              link = $el.attr('href');
+              link = url.resolve(pageUrl, $el.attr('href'));
           if(filename && link)
             files.push({ filename, link });
         });
