@@ -7,7 +7,6 @@ const util = require('../util')
 
 exports.handler = function(req, res, next) {
   var url = req.projectUrl;
-
   scraperjs.StaticScraper.create(url)
     .scrape(function($) {
    var result = {
@@ -43,13 +42,16 @@ exports.handler = function(req, res, next) {
    result.description = result.main_description.substr(0,120)+' ...'
 
    var dateInfo =  $('p.project-time').text().trim();
-   var regexString = /This project was\s+created on ([0-9]{2})\/([0-9]{2})\/([0-9]{4})\s+and last updated ([0-9]+) ([a-zA-Z]+)/i;
+   var regexString = /created on ([0-9]{2})\/([0-9]{2})\/([0-9]{4})\s+and last updated ([a0-9]+) ([a-zA-Z]+)/i;
    var arrMatches = dateInfo.trim().match(regexString);
-   result.date = moment([arrMatches[3], arrMatches[1], arrMatches[2]]).format();
-   result.datemod = moment().subtract(arrMatches[4], arrMatches[5]).format();
-   
+   if(arrMatches != null){   
+      result.date = moment([arrMatches[3], arrMatches[1], arrMatches[2]]).format();
+      if (arrMatches[4]=='a') { arrMatches[4] = '1'; }
+      result.datemod = moment().subtract(arrMatches[4], arrMatches[5]).format();
+   }   
    result.download_url = url;
    result.image_download = $('meta[name="twitter:image"]').attr('content');
+
    return result;
    })
    .then(function(result) {
