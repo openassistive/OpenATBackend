@@ -52,6 +52,14 @@ var allServices = module.exports.allServices = [
     }
   },
   {
+    name: 'hackaday',
+    baseUrl: 'https://hackaday.io',
+    prefix: '/project/',
+    projectPath: {
+      skip: 0 // take the rest
+    }
+  },
+  {
     name: 'httpfile' // input url is required
   },
   {
