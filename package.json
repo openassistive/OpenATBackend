@@ -19,7 +19,7 @@
     "hubfs.js": "^1.0.0",
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
-    "moment": "^2.15.2",
+    "moment": "^2.19.1",
     "octokat": "^0.6.4",
     "octonode": "^0.7.7",
     "request": "^2.81.0",

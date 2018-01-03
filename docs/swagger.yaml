@@ -48,6 +48,7 @@ paths:
         - "pinshape"
         - "sourceforge"
         - "thingiverse"
+        - "hackaday"
         - "dropbox"
         - "httpfile"
       - name: "id"
@@ -57,6 +58,7 @@ paths:
           * github: username/projectname
           * instructables: identifier
           * pinshape: identifier
+          * hackaday: identifier
           * sourceforge: projectname
           * thingiverse: thing:id `OR` id
           * dropbox: path
