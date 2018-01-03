@@ -5,7 +5,7 @@ var github = require('octonode');
 const util = require('../util')
 
 var fromApi = function(repoPath) {
-  var client = github.client();
+  var client = github.client(process.env.GitHubOAuth);
   var promise = new Promise(function(resolve, reject) {
     client.get('/repos' + repoPath, function(err, status, body, headers) {
       if(err && err.statusCode === 404) {
