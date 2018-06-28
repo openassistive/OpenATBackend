@@ -56,7 +56,7 @@ var scrape = function(url) {
         result.project_url = project_url;
       }
 
-      result.License = $('h1:contains("License")').first().next('p').text()
+      result.license = $('h1:contains("License")').first().next('p').text()
         || $('h2:contains("License")').first().next('p').text()
         || $('h3:contains("License")').first().next('p').text();
 

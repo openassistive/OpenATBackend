@@ -12,7 +12,7 @@ exports.handler = function(req, res, next) {
    var result = {
      title: "",
      authors: "",
-     License: "",
+     license: "",
      datemod: "",
      download_url: "",
      project_url: "",
@@ -36,7 +36,7 @@ exports.handler = function(req, res, next) {
    }
 
    result.short_title = contentCreator.genShortTitle(result.title);
-   result.License = 'Unknown';
+   result.license = 'Unknown';
    result.main_description = $('meta[name="twitter:description"]').attr('content');
    result.authors = $('div.author span.identity-card').text().trim();
    result.description = result.main_description.substr(0,120)+' ...'

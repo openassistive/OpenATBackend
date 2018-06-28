@@ -13,7 +13,7 @@ exports.handler = function(req, res, next) {
       var result = {
         title: "",
         authors: "",
-        License: "",
+        license: "",
         datemod: "",
         download_url: "",
         project_url: "",
@@ -38,7 +38,7 @@ exports.handler = function(req, res, next) {
       var rexp = /( by)([a-zA-Z0-9-|()! ]+)+( Instructables)/ig;
       result.title = result.title.replace(rexp, ' ').trim();
       result.short_title = contentCreator.genShortTitle(result.title);
-      result.License = $('section#project-categories-and-license section.content a').text().trim();
+      result.license = $('section#project-categories-and-license section.content a').text().trim();
 
       // Oct. 5, 2015, 8:12 a.m.
       // 2016-05-12 16:40:03.0

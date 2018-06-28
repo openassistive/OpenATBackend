@@ -13,7 +13,7 @@ exports.handler = function(req, res, next) {
       var result = {
         title: "",
         authors: "",
-        License: "",
+        license: "",
         datemod: "",
         download_url: "",
         project_url: "",
@@ -36,7 +36,7 @@ exports.handler = function(req, res, next) {
         result.title= pinshape_JSON.name;
         result.short_title = contentCreator.genShortTitle(result.title);
         result.download_url = pinshape_JSON.zip_file.url;
-        result.License =  pinshape_JSON.usage_license;
+        result.license =  pinshape_JSON.usage_license;
 
         $('div.designed-by a').filter(function() {
           var data = $(this);

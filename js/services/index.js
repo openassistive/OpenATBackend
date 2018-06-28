@@ -35,7 +35,7 @@ var allServices = module.exports.allServices = [
   },
   {
     name: 'sourceforge',
-    baseUrl: 'http://www.sourceforge.com/',
+    baseUrl: 'https://sourceforge.net/',
     prefix: 'projects/',
     projectPath: {
       skip: 0,

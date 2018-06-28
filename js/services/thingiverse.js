@@ -13,7 +13,7 @@ exports.handler = function(req, res, next) {
       var result = {
         title: "",
         authors: "",
-        License: "",
+        license: "",
         datemod: "",
         download_url: "",
         project_url: "",
@@ -39,7 +39,7 @@ exports.handler = function(req, res, next) {
       result.title = result.title.replace(rexp2, '').trim();
 
       result.short_title = contentCreator.genShortTitle(result.title);
-      result.License = $('div.thing-license').first().attr('title');
+      result.license = $('div.thing-license').first().attr('title');
       var datemod = Date.parse($('div.thing-header-data time').attr('datetime'));
       if(!datemod) // could not parse datemod
         datemod = new Date();
