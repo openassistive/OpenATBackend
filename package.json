@@ -21,7 +21,7 @@
     "mkdirp": "^0.5.1",
     "moment": "^2.19.1",
     "octokat": "^0.6.4",
-    "octonode": "^0.7.7",
+    "octonode": "^0.9.3",
     "request": "^2.81.0",
     "sanitize-html": "^1.14.1",
     "scraperjs": "^1.2.0",
