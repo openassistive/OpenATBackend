@@ -3,8 +3,12 @@
   "description": "The Backend for an OpenAT system",
   "repository": "https://github.com/openassistive/OpenATBackend",
   "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "stack": "heroku-18",
   "keywords": ["node", "express", "api"],
-  "buildpacks": [{"url": "https://github.com/alex88/heroku-buildpack-vips.git"}, {"url":"heroku/node"}],
+  "buildpacks": [{"url": "https://github.com/alex88/heroku-buildpack-vips.git"},{"url":"heroku/node"}], 
+   "engines": {
+    "node": "12.13.0"
+  },
   "env": {
     "GitHubOAuth": {
       "description": "The GitHub Personal Token. Create one here: https://github.com/settings/tokens",
