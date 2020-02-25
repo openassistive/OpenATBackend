@@ -7,7 +7,7 @@
   "keywords": ["node", "express", "api"],
   "buildpacks": [{"url": "https://github.com/alex88/heroku-buildpack-vips.git"},{"url":"heroku/node"}], 
    "engines": {
-    "node": "12.13.0"
+    "node": "10.17.0"
   },
   "env": {
     "GitHubOAuth": {
