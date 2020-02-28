@@ -7,7 +7,7 @@
   "keywords": ["node", "express", "api"],
   "buildpacks": [{"url":"heroku/node"}], 
    "engines": {
-    "node": "10.17.0"
+    "node": "8.16.2"
   },
   "env": {
     "GitHubOAuth": {
