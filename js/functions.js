@@ -181,7 +181,7 @@ exports.commitChangesToGithub = function(branch, message, changes) {
 /** @brief default options for downloadFileToBuffer
  */
 exports.downloadFileToBufferDefaultOptions = {
-  limit: 2 * 1024 * 1024, // 2MiB
+  limit: 4 * 1024 * 1024, // 2MiB
 };
 
 /** @brief download a file from net, return the content as buffer
