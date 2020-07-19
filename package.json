@@ -30,6 +30,12 @@
     "tmp": "0.0.30",
     "to-markdown": "^3.0.3",
     "validate": "^3.0.1",
-    "yamljs": "^0.2.8"
-  }
+    "yamljs": "^0.2.8",
+    "snyk": "^1.88.0"
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "snyk": true
 }
