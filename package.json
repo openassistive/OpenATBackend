@@ -4,6 +4,9 @@
   "description": "Create MD files from provided sites",
   "main": "server.js",
   "author": "willwade",
+  "engines": {
+    "node": "10.24.1"
+  },
   "repository": {
     "type": "git",
     "url": "http://github.com/openassistive/OpenATBackEnd"
