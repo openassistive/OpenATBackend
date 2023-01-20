@@ -28,7 +28,7 @@
     "request": "^2.81.0",
     "sanitize-html": "^1.14.1",
     "scraperjs": "^1.2.0",
-    "sharp": "^0.28.3",
+    "sharp": "^0.21.3",
     "titlecase": "^1.1.2",
     "tmp": "0.0.30",
     "to-markdown": "^3.0.3",
